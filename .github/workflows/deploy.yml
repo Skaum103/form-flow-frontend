@@ -25,33 +25,34 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # Step 3: Configure AWS Credentials
       - name: Configure AWS Credentials
         run: |
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region $AWS_REGION
 
-      # Step 3: Log in to AWS ECR
+      # Step 4: Log in to AWS ECR
       - name: Log in to AWS ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      # Step 4: Build the Docker image
+      # Step 5: Build the Docker image
       - name: Build Docker image
         run: |
           docker build -t $ECR_REPOSITORY:latest .
 
-      # Step 5: Tag the Docker image with the ECR repository URI
+      # Step 6: Tag the Docker image with the ECR repository URI
       - name: Tag Docker image
         run: |
           docker tag $ECR_REPOSITORY:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
 
-      # Step 6: Push the Docker image to ECR
+      # Step 7: Push the Docker image to ECR
       - name: Push Docker image to ECR
         run: |
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
 
-      # Step 7: Create a Dockerrun.aws.json file
+      # Step 8: Create a Dockerrun.aws.json file
       - name: Create Dockerrun.aws.json
         run: |
           echo '{
@@ -67,19 +68,23 @@ jobs:
             ]
           }' > Dockerrun.aws.json
 
+        # Step 9: Zip the Dockerrun.aws.json file
+      - name: Zip Dockerrun.aws.json
+        run: |
+          zip default-dockerrun.zip Dockerrun.aws.json
+          aws s3 cp default-dockerrun.zip s3://form-flow-bucket/deploy/frontend/default-dockerrun.zip
+
       # Step 8: Deploy to AWS Elastic Beanstalk
       - name: Deploy to AWS Elastic Beanstalk
         run: |
           # Create a new application version
           aws elasticbeanstalk create-application-version \
             --application-name $EB_APPLICATION_NAME \
-            --version-label $(git rev-parse --short HEAD) \
-            --source-bundle S3Bucket=elasticbeanstalk-$AWS_REGION-${{ secrets.AWS_ACCOUNT_ID }},S3Key=default-dockerrun.zip \
-            --region $AWS_REGION
+            --version-label "v-${{ github.run_number }}" \
+            --source-bundle S3Bucket="form-flow-bucket",S3Key="deploy/frontend/deploy.zip"
 
           # Update the environment to use the new version
           aws elasticbeanstalk update-environment \
             --application-name $EB_APPLICATION_NAME \
             --environment-name $EB_ENVIRONMENT_NAME \
-            --version-label $(git rev-parse --short HEAD) \
-            --region $AWS_REGION
+            --version-label "v-${{ github.run_number }}"
