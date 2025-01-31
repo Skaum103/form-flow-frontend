@@ -47,6 +47,7 @@ jobs:
       - name: Upload Docker image to S3
         run: |
           aws s3 cp form-flow-frontend.tar s3://$S3_BUCKET/deploy/frontend/form-flow-frontend.tar
+          aws s3 cp Dockerrun.aws.json s3://$S3_BUCKET/Dockerrun.aws.json
 
       # Step 7: Deploy to AWS Elastic Beanstalk
       - name: Deploy to AWS Elastic Beanstalk
