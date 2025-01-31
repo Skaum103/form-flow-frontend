@@ -25,6 +25,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      - name: Configure AWS Credentials
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $secrets.AWS_SECRET_ACCESS_KEY
+          aws configure set region $.AWS_REGION
+
       # Step 3: Log in to AWS ECR
       - name: Log in to AWS ECR
         id: login-ecr
