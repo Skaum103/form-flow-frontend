@@ -71,8 +71,8 @@ jobs:
         # Step 9: Zip the Dockerrun.aws.json file
       - name: Zip Dockerrun.aws.json
         run: |
-          zip default-dockerrun.zip Dockerrun.aws.json
-          aws s3 cp default-dockerrun.zip s3://form-flow-bucket/deploy/frontend/default-dockerrun.zip
+          zip deploy.zip Dockerrun.aws.json
+          aws s3 cp deploy.zip s3://form-flow-bucket/deploy/frontend/deploy.zip
 
       # Step 8: Deploy to AWS Elastic Beanstalk
       - name: Deploy to AWS Elastic Beanstalk
