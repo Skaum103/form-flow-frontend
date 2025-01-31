@@ -1,0 +1,64 @@
+name: Deploy React App to AWS EBS via Docker and S3
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  S3_BUCKET: form-flow-bucket
+  EB_APPLICATION_NAME: form-flow
+  EB_ENVIRONMENT_NAME: form-flow-fe-env
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Step 3: Log in to AWS (for S3 and Elastic Beanstalk access)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Step 4: Build the Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t form-flow-frontend .
+
+      # Step 5: Save the Docker image as a .tar file
+      - name: Save Docker image as .tar
+        run: |
+          docker save -o form-flow-frontend.tar form-flow-frontend
+
+      # Step 6: Upload the .tar file to S3
+      - name: Upload Docker image to S3
+        run: |
+          aws s3 cp form-flow-frontend.tar s3://$S3_BUCKET/deploy/frontend/form-flow-frontend.tar
+
+      # Step 7: Deploy to AWS Elastic Beanstalk
+      - name: Deploy to AWS Elastic Beanstalk
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name $EB_APPLICATION_NAME \
+            --version-label $(git rev-parse --short HEAD) \
+            --source-bundle S3Bucket=$S3_BUCKET,S3Key=deploy/frontend/form-flow-frontend.tar \
+            --region $AWS_REGION
+
+          aws elasticbeanstalk update-environment \
+            --application-name $EB_APPLICATION_NAME \
+            --environment-name $EB_ENVIRONMENT_NAME \
+            --version-label $(git rev-parse --short HEAD) \
+            --region $AWS_REGION
