@@ -8,7 +8,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  S3_BUCKET: form-flow-bucket
+  ECR_REPOSITORY: form-flow-frontend
   EB_APPLICATION_NAME: form-flow
   EB_ENVIRONMENT_NAME: form-flow-fe-env
 
@@ -25,46 +25,53 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Step 3: Log in to AWS (for S3 and Elastic Beanstalk access)
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+      # Step 3: Log in to AWS ECR
+      - name: Log in to AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
       # Step 4: Build the Docker image
       - name: Build Docker image
         run: |
-          docker build -t form-flow-frontend .
+          docker build -t $ECR_REPOSITORY:latest .
 
-      # Step 5: Save the Docker image as a .tar file
-      - name: Save Docker image as .tar
+      # Step 5: Tag the Docker image with the ECR repository URI
+      - name: Tag Docker image
         run: |
-          docker save -o form-flow-frontend.tar form-flow-frontend
+          docker tag $ECR_REPOSITORY:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
 
-      # Step 6: Create a source bundle (zip file) with Dockerrun.aws.json and the .tar file
-      - name: Create source bundle
+      # Step 6: Push the Docker image to ECR
+      - name: Push Docker image to ECR
         run: |
-          mkdir -p deploy-bundle
-          cp form-flow-frontend.tar deploy-bundle/
-          cp Dockerrun.aws.json deploy-bundle/
-          zip -r deploy-bundle.zip deploy-bundle/
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
 
-      # Step 7: Upload the .tar file to S3
-      - name: Upload Docker image to S3
+      # Step 7: Create a Dockerrun.aws.json file
+      - name: Create Dockerrun.aws.json
         run: |
-          aws s3 cp deploy-bundle.zip s3://$S3_BUCKET/deploy/frontend/deploy-bundle.zip
+          echo '{
+            "AWSEBDockerrunVersion": "1",
+            "Image": {
+              "Name": "'$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest'",
+              "Update": "true"
+            },
+            "Ports": [
+              {
+                "ContainerPort": 80
+              }
+            ]
+          }' > Dockerrun.aws.json
 
       # Step 8: Deploy to AWS Elastic Beanstalk
       - name: Deploy to AWS Elastic Beanstalk
         run: |
+          # Create a new application version
           aws elasticbeanstalk create-application-version \
             --application-name $EB_APPLICATION_NAME \
             --version-label $(git rev-parse --short HEAD) \
-            --source-bundle S3Bucket=$S3_BUCKET,S3Key=deploy/frontend/deploy-bundle.zip \
+            --source-bundle S3Bucket=elasticbeanstalk-$AWS_REGION-$AWS_ACCOUNT_ID,S3Key=default-dockerrun.zip \
             --region $AWS_REGION
 
+          # Update the environment to use the new version
           aws elasticbeanstalk update-environment \
             --application-name $EB_APPLICATION_NAME \
             --environment-name $EB_ENVIRONMENT_NAME \
