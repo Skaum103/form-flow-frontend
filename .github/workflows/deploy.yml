@@ -12,7 +12,6 @@ env:
   EB_APPLICATION_NAME: form-flow
   EB_ENVIRONMENT_NAME: form-flow-fe-env
 
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
