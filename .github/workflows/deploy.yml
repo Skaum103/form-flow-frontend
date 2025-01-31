@@ -6,11 +6,13 @@ on:
       - main
   workflow_dispatch:
 
+
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: form-flow-frontend
   EB_APPLICATION_NAME: form-flow
   EB_ENVIRONMENT_NAME: form-flow-fe-env
+
 
 jobs:
   build-and-deploy:
