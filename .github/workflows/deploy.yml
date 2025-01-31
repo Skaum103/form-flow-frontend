@@ -27,9 +27,9 @@ jobs:
 
       - name: Configure AWS Credentials
         run: |
-          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-          aws configure set aws_secret_access_key $secrets.AWS_SECRET_ACCESS_KEY
-          aws configure set region $.AWS_REGION
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region $AWS_REGION
 
       # Step 3: Log in to AWS ECR
       - name: Log in to AWS ECR
@@ -44,12 +44,12 @@ jobs:
       # Step 5: Tag the Docker image with the ECR repository URI
       - name: Tag Docker image
         run: |
-          docker tag $ECR_REPOSITORY:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
+          docker tag $ECR_REPOSITORY:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
 
       # Step 6: Push the Docker image to ECR
       - name: Push Docker image to ECR
         run: |
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
 
       # Step 7: Create a Dockerrun.aws.json file
       - name: Create Dockerrun.aws.json
@@ -57,7 +57,7 @@ jobs:
           echo '{
             "AWSEBDockerrunVersion": "1",
             "Image": {
-              "Name": "'$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest'",
+              "Name": "'${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest'",
               "Update": "true"
             },
             "Ports": [
@@ -74,7 +74,7 @@ jobs:
           aws elasticbeanstalk create-application-version \
             --application-name $EB_APPLICATION_NAME \
             --version-label $(git rev-parse --short HEAD) \
-            --source-bundle S3Bucket=elasticbeanstalk-$AWS_REGION-$AWS_ACCOUNT_ID,S3Key=default-dockerrun.zip \
+            --source-bundle S3Bucket=elasticbeanstalk-$AWS_REGION-${{ secrets.AWS_ACCOUNT_ID }},S3Key=default-dockerrun.zip \
             --region $AWS_REGION
 
           # Update the environment to use the new version
