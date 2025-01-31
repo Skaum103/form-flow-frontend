@@ -49,12 +49,12 @@ jobs:
           mkdir -p deploy-bundle
           cp form-flow-frontend.tar deploy-bundle/
           cp Dockerrun.aws.json deploy-bundle/
-          zip -r form-flow-frontend.tar deploy-bundle/
+          zip -r deploy-bundle.zip deploy-bundle/
 
       # Step 7: Upload the .tar file to S3
       - name: Upload Docker image to S3
         run: |
-          aws s3 cp form-flow-frontend.tar s3://$S3_BUCKET/deploy/frontend/form-flow-frontend.tar
+          aws s3 cp deploy-bundle.zip s3://$S3_BUCKET/deploy/frontend/deploy-bundle.zip
 
       # Step 8: Deploy to AWS Elastic Beanstalk
       - name: Deploy to AWS Elastic Beanstalk
@@ -62,7 +62,7 @@ jobs:
           aws elasticbeanstalk create-application-version \
             --application-name $EB_APPLICATION_NAME \
             --version-label $(git rev-parse --short HEAD) \
-            --source-bundle S3Bucket=$S3_BUCKET,S3Key=deploy/frontend/form-flow-frontend.tar \
+            --source-bundle S3Bucket=$S3_BUCKET,S3Key=deploy/frontend/deploy-bundle.zip \
             --region $AWS_REGION
 
           aws elasticbeanstalk update-environment \
