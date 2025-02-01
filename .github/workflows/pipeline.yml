@@ -13,7 +13,40 @@ env:
   EB_ENVIRONMENT_NAME: form-flow-fe-env
 
 jobs:
-  build-and-deploy:
+  ci: # Continuous Integration Job
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Run Linter
+      - name: Run Linter
+        run: npm run lint
+
+      # Step 5: Run Tests
+      - name: Run Tests
+        run: npm test
+
+      # Step 6: Build React App
+      - name: Build React App
+        run: npm run build
+
+
+  cd:
     runs-on: ubuntu-latest
 
     steps:
@@ -68,13 +101,13 @@ jobs:
             ]
           }' > Dockerrun.aws.json
 
-        # Step 9: Zip the Dockerrun.aws.json file
+      # Step 9: Zip the Dockerrun.aws.json file
       - name: Zip Dockerrun.aws.json
         run: |
           zip deploy.zip Dockerrun.aws.json
           aws s3 cp deploy.zip s3://form-flow-bucket/deploy/frontend/deploy.zip
 
-      # Step 8: Deploy to AWS Elastic Beanstalk
+      # Step 10: Deploy to AWS Elastic Beanstalk
       - name: Deploy to AWS Elastic Beanstalk
         run: |
           # Create a new application version
