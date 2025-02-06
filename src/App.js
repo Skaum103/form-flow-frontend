@@ -1,16 +1,11 @@
 import React from 'react';
-// 从 react-router-dom 中引入 Routes、Route
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route
-} from 'react-router-dom';
-
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header/Header'; 
 import Footer from './components/Footer/Footer';
 import Home from './pages/Home';
 import CreateApplication from './pages/CreateApplication';
-
+import Login from './pages/Login';
+import Register from './pages/Register';
 function App() {
   return (
     <Router>
@@ -21,6 +16,8 @@ function App() {
           {/* 使用 element 属性传入要渲染的组件 */}
           <Route path="/" element={<Home />} />
           <Route path="/CreateApplication" element={<CreateApplication />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       </div>
       <Footer />
