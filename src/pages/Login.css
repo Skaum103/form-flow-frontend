@@ -1,0 +1,112 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh; /* 根据你的需求调整 */
+    background-color:rgba(0, 0, 0, 0);
+  }
+  
+  .login-form {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 24px 32px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    width: 360px;
+  }
+  
+  .login-form h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #333;
+  }
+  
+  .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666;
+    font-weight: bold;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .login-btn {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    background-color: #007bff; /* 你可以改成任何颜色 */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .login-btn:hover {
+    background-color: #0056b3; 
+  }
+  
+  .error-msg {
+    margin-bottom: 16px;
+    padding: 8px;
+    border: 1px solid red;
+    color: red;
+    background-color: #ffe6e6;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  /* 原有的 .login-container, .login-form, .form-group 等样式保持不变，这里只列举新增或修改部分 */
+
+.login-btn {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    background-color: #007bff; /* 登录按钮背景色 */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 8px; /* 给按钮和下方“注册”入口留点间距 */
+  }
+  
+  .login-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  /* 新增的 “注册” 入口所在的区域 */
+  .register-footer {
+    margin-top: 16px;
+    text-align: center;
+  }
+  
+  /* 让文字和按钮在一行里更好看一点 */
+  .register-footer span {
+    margin-right: 8px;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  /* “立即注册” 按钮或链接的样式 */
+  .register-link {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .register-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+  
