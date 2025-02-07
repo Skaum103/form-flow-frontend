@@ -38,7 +38,19 @@ function Register() {
             placeholder="Enter your password"
             required
           />
-        </div>        
+        </div>
+        <button type="submit" className="login-btn">
+          Register
+        </button>
+        <div className="register-footer">
+          <span>Already have an account?</span>
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="register-link"
+          >
+            Log in
+          </button>        
       </form>
     </div>
   );
