@@ -12,7 +12,11 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-  
+    if (password !== confirmPassword) {
+      setErrorMsg("Passwords do not match!");
+      return;
+    }
+
     try {
       const response = await fetch("http://你的后端接口/api/register", {
         method: "POST",
