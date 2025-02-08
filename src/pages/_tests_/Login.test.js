@@ -10,6 +10,17 @@ jest.mock("react-router-dom", () => ({
 }));
 
 describe("Login Component", () => {
+  beforeEach(() => {
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        setItem: jest.fn(),
+        getItem: jest.fn(),
+        removeItem: jest.fn(),
+      },
+      writable: true,
+    });
+  });
+
   test("renders login form correctly", () => {
     render(
       <BrowserRouter>
@@ -97,6 +108,7 @@ describe("Login Component", () => {
   });
 
   test("successful login stores token and navigates", async () => {
+    // Mock fetch 返回成功的响应
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: true,
@@ -104,18 +116,25 @@ describe("Login Component", () => {
       })
     );
 
+    // Mock localStorage
+    jest.spyOn(global.localStorage, "setItem");
+
     render(
       <BrowserRouter>
         <Login />
       </BrowserRouter>
     );
 
-    const loginButton = screen.getByText("Log in");
-    fireEvent.click(loginButton);
+    // 触发登录按钮点击
+    fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
 
-    await new Promise((r) => setTimeout(r, 100)); // 等待异步操作完成
+    // 等待异步操作完成
+    await screen.findByRole("button", { name: "Log in Now !" });
 
-    expect(localStorage.getItem("token")).toBe("mocked_token");
+    // 确保 localStorage.setItem 被调用
+    expect(localStorage.setItem).toHaveBeenCalledWith("token", "mocked_token");
+
+    // 确保导航到 "/"
     expect(mockedUsedNavigate).toHaveBeenCalledWith("/");
   });
 });
