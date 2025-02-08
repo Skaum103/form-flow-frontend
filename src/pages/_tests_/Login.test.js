@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Login from "../Login";
 
-// Mock useNavigate
+// 模拟react-router-dom 里的 useNavigate，以便在 Jest 测试中跟踪 页面跳转 是否正确发生。
 const mockedUsedNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
@@ -10,9 +10,11 @@ jest.mock("react-router-dom", () => ({
 }));
 
 describe("Login Component", () => {
+  //每个测试前都会执行这个代码，确保 localStorage 是 mock 版本。
   beforeEach(() => {
     Object.defineProperty(window, "localStorage", {
       value: {
+        //让 localStorage.setItem 变成 Jest mock 函数，以便测试是否正确存储 token。
         setItem: jest.fn(),
         getItem: jest.fn(),
         removeItem: jest.fn(),
@@ -21,6 +23,7 @@ describe("Login Component", () => {
     });
   });
 
+  // 测试 1：检查 Login 页面的各个组件是否正确渲染
   test("renders login form correctly", () => {
     render(
       <BrowserRouter>
@@ -49,6 +52,7 @@ describe("Login Component", () => {
     expect(screen.getByText("Does not have an account?")).toBeInTheDocument();
   });
 
+  // 测试 2：检查输入框是否能正确更新
   test("updates username and password input values", () => {
     render(
       <BrowserRouter>
@@ -62,15 +66,17 @@ describe("Login Component", () => {
     const passwordInput = screen.getByPlaceholderText(
       "Please enter your password"
     );
-
+    //模拟用户在用户名输入框输入 "testuser"，在密码输入框输入 "password123"
     fireEvent.change(usernameInput, { target: { value: "testuser" } });
     fireEvent.change(passwordInput, { target: { value: "password123" } });
-
+    //断言输入框的值是否正确更新
     expect(usernameInput.value).toBe("testuser");
     expect(passwordInput.value).toBe("password123");
   });
 
+  // 测试 3：检查登录失败时是否显示错误消息
   test("shows error message when login fails", async () => {
+    //Mock fetch 返回一个失败的响应 { success: false, message: "Invalid credentials" }。
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: false,
@@ -85,15 +91,16 @@ describe("Login Component", () => {
       </BrowserRouter>
     );
 
-    const loginButton = screen.getByText("Log in");
-
+    //模拟点击登录按钮
     fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
 
+    // 等待错误消息渲染，然后检查它的文本是否是 "Invalid credentials"
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Invalid credentials"
     );
   });
 
+  // 测试 4：检查点击 "Register Now" 是否跳转到注册页面
   test("navigates to register page when clicking 'Register Now'", () => {
     render(
       <BrowserRouter>
@@ -102,11 +109,13 @@ describe("Login Component", () => {
     );
 
     const registerButton = screen.getByText("Register Now");
+    // 模拟点击注册按钮。
     fireEvent.click(registerButton);
-
+    //断言 useNavigate 是否被调用，并且路径是 "/register"
     expect(mockedUsedNavigate).toHaveBeenCalledWith("/register");
   });
 
+  //测试 5：检查成功登录是否存储 token 并跳转
   test("successful login stores token and navigates", async () => {
     // Mock fetch 返回成功的响应
     global.fetch = jest.fn(() =>
@@ -117,7 +126,7 @@ describe("Login Component", () => {
     );
 
     // Mock localStorage
-    jest.spyOn(global.localStorage, "setItem");
+    // jest.spyOn(global.localStorage, "setItem");
 
     render(
       <BrowserRouter>
@@ -132,6 +141,7 @@ describe("Login Component", () => {
     await screen.findByRole("button", { name: "Log in Now !" });
 
     // 确保 localStorage.setItem 被调用
+    // 确保 Login.js 正确地存储了 token，否则后续的认证流程会出错
     expect(localStorage.setItem).toHaveBeenCalledWith("token", "mocked_token");
 
     // 确保导航到 "/"
