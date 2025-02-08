@@ -112,12 +112,14 @@ jobs:
       # Step 10: Deploy to AWS Elastic Beanstalk
       - name: Deploy to AWS Elastic Beanstalk
         run: |
+          VERSION_LABEL="v-$(date +%Y%m%d%H%M%S)"
+          
           aws elasticbeanstalk create-application-version \
             --application-name $EB_APPLICATION_NAME \
-            --version-label "v-${{ github.run_number }}" \
+            --version-label "$VERSION_LABEL" \
             --source-bundle S3Bucket="form-flow-bucket",S3Key="deploy/frontend/deploy.zip"
 
           aws elasticbeanstalk update-environment \
             --application-name $EB_APPLICATION_NAME \
             --environment-name $EB_ENVIRONMENT_NAME \
-            --version-label "v-${{ github.run_number }}"
+            --version-label "$VERSION_LABEL" \
