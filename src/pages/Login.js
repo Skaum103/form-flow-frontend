@@ -18,7 +18,7 @@ function Login() {
       });
 
       if (!response.ok) {
-        throw new Error("登录失败，请检查用户名或密码");
+        throw new Error("Invalid credentials");
       }
 
       const data = await response.json();
@@ -26,7 +26,7 @@ function Login() {
         localStorage.setItem("token", data.token);
         navigate("/"); // 登录成功后跳转首页或别的页面
       } else {
-        setErrorMsg(data.message || "登录失败");
+        setErrorMsg(data.message || "Login failed");
       }
     } catch (error) {
       setErrorMsg(error.message);
@@ -42,7 +42,7 @@ function Login() {
     <div className="login-container">
       <form className="login-form" onSubmit={handleSubmit}>
         <h2>Log in</h2>
-        {errorMsg && <div className="error-msg">{errorMsg}</div>}
+        {errorMsg && <div role="alert" className="error-msg">{errorMsg}</div>}
         <div className="form-group">
           <label>User Name</label>
           <input
@@ -64,7 +64,7 @@ function Login() {
           />
         </div>
         <button type="submit" className="login-btn">
-          Log in
+          Log  in  Now !
         </button>
         {/* 下面这个 div 专门放注册入口 */}
         <div className="register-footer">

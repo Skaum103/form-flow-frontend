@@ -29,8 +29,11 @@ describe("Login Component", () => {
     expect(
       screen.getByPlaceholderText("Please enter your password")
     ).toBeInTheDocument();
+
     // 确保按钮存在
-    expect(screen.getByRole("button", { name: "Log in" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Log in Now !" })
+    ).toBeInTheDocument();
 
     expect(screen.getByText("Does not have an account?")).toBeInTheDocument();
   });
@@ -73,9 +76,11 @@ describe("Login Component", () => {
 
     const loginButton = screen.getByText("Log in");
 
-    fireEvent.click(loginButton);
+    fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
 
-    expect(await screen.findByText("Invalid credentials")).toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Invalid credentials"
+    );
   });
 
   test("navigates to register page when clicking 'Register Now'", () => {
