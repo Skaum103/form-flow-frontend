@@ -24,6 +24,7 @@ function Login() {
       const data = await response.json();
       if (data.success) {
         localStorage.setItem("token", data.token);
+        localStorage.setItem("username", username);
         navigate("/"); // 登录成功后跳转首页或别的页面
       } else {
         setErrorMsg(data.message || "Login failed");
