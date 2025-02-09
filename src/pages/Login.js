@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
-function Login() {
+function Login({ setUser }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -16,10 +16,11 @@ function Login() {
       formData.append("username", username);
       formData.append("password", password);
 
-      const response = await fetch("http://你的后端接口/api/login", {
+      const response = await fetch("http://form-flow-be.us-east-1.elasticbeanstalk.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData.toString(), // 这里需要转成字符串
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -31,6 +32,7 @@ function Login() {
       if (data.success) {
         localStorage.setItem("JSESSIONID", data.JSESSIONID);
         localStorage.setItem("username", username);
+        setUser(username); // 立即更新状态，让 Header 重新渲染
         navigate("/"); // 登录成功后跳转首页或别的页面
       } else {
         setErrorMsg(data.message || "Login failed");

@@ -115,7 +115,7 @@ describe("Login Component", () => {
     expect(mockedUsedNavigate).toHaveBeenCalledWith("/register");
   });
 
-  //测试 5：检查成功登录是否存储 token 并跳转
+  //测试 5：检查成功登录是否存储 JSESSIONID 并跳转
   test("successful login stores session ID and navigates", async () => {
     // Mock fetch 返回成功的响应
     global.fetch = jest.fn(() =>
@@ -134,7 +134,7 @@ describe("Login Component", () => {
   
     render(
       <BrowserRouter>
-        <Login />
+        <Login setUser={jest.fn()} />
       </BrowserRouter>
     );
   

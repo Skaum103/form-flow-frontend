@@ -1,25 +1,14 @@
 import React from "react";
-import { useState, useEffect } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import "./Header.css";
 
-function Header() {
-  const [username, setUsername] = useState(null);
+function Header({ user, setUser }) {
   const navigate = useNavigate();
-
-  // 组件加载时，检查 localStorage 是否存有用户信息
-  useEffect(() => {
-    const storedUser = localStorage.getItem("username");
-    if (storedUser) {
-      setUsername(storedUser);
-    }
-  }, []);
-
   const handleLogout = () => {
-    localStorage.removeItem("token");
     localStorage.removeItem("username");
-    setUsername(null);
-    navigate("/login"); // 退出后跳转到登录页面
+    localStorage.removeItem("JSESSIONID");
+    setUser(null);
+    navigate("/");
   };
   return (
     <header className="header">
@@ -64,9 +53,9 @@ function Header() {
       </div>
 
       <div className="header-right">
-        {username ? (
+        {user ? (
           <div className="user-dropdown">
-            <span className="username">{username}</span>
+            <span className="username">{user}</span>
             <div className="dropdown-menu">
               <button onClick={handleLogout}>Log out</button>
             </div>
