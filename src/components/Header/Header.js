@@ -1,9 +1,15 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
-import { Link } from 'react-router-dom';
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import "./Header.css";
 
-function Header() {
+function Header({ user, setUser }) {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem("username");
+    localStorage.removeItem("JSESSIONID");
+    setUser(null);
+    navigate("/");
+  };
   return (
     <header className="header">
       <div className="header-left">
@@ -47,9 +53,18 @@ function Header() {
       </div>
 
       <div className="header-right">
-        <Link to="/login">
-          <button>Log In</button>
-        </Link>
+        {user ? (
+          <div className="user-dropdown">
+            <span className="username">{user}</span>
+            <div className="dropdown-menu">
+              <button onClick={handleLogout}>Log out</button>
+            </div>
+          </div>
+        ) : (
+          <Link to="/login">
+            <button className="login-btn">Log In</button>
+          </Link>
+        )}
       </div>
     </header>
   );

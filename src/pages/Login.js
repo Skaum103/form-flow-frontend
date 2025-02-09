@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
-function Login() {
+function Login({ setUser }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -11,19 +11,28 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://你的后端接口/api/login", {
+      // 创建 x-www-form-urlencoded 格式的数据
+      const formData = new URLSearchParams();
+      formData.append("username", username);
+      formData.append("password", password);
+
+      const response = await fetch("http://form-flow-be.us-east-1.elasticbeanstalk.com/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString(), // 这里需要转成字符串
+        credentials: "include",
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Invalid credentials");
+        throw new Error(data.message || "Invalid credentials");
       }
 
-      const data = await response.json();
       if (data.success) {
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("JSESSIONID", data.JSESSIONID);
+        localStorage.setItem("username", username);
+        setUser(username); // 立即更新状态，让 Header 重新渲染
         navigate("/"); // 登录成功后跳转首页或别的页面
       } else {
         setErrorMsg(data.message || "Login failed");
@@ -42,7 +51,11 @@ function Login() {
     <div className="login-container">
       <form className="login-form" onSubmit={handleSubmit}>
         <h2>Log in</h2>
-        {errorMsg && <div role="alert" className="error-msg">{errorMsg}</div>}
+        {errorMsg && (
+          <div role="alert" className="error-msg">
+            {errorMsg}
+          </div>
+        )}
         <div className="form-group">
           <label>User Name</label>
           <input
@@ -64,7 +77,7 @@ function Login() {
           />
         </div>
         <button type="submit" className="login-btn">
-          Log  in  Now !
+          Log in Now !
         </button>
         {/* 下面这个 div 专门放注册入口 */}
         <div className="register-footer">
