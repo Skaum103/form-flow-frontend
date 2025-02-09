@@ -116,35 +116,39 @@ describe("Login Component", () => {
   });
 
   //测试 5：检查成功登录是否存储 token 并跳转
-  test("successful login stores token and navigates", async () => {
+  test("successful login stores session ID and navigates", async () => {
     // Mock fetch 返回成功的响应
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ success: true, token: "mocked_token" }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            JSESSIONID: "mocked_session_id", // 后端返回 JSESSIONID，而不是 token
+          }),
       })
     );
-
+  
     // Mock localStorage
-    // jest.spyOn(global.localStorage, "setItem");
-
+    jest.spyOn(global.localStorage, "setItem");
+  
     render(
       <BrowserRouter>
         <Login />
       </BrowserRouter>
     );
-
+  
     // 触发登录按钮点击
     fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
-
+  
     // 等待异步操作完成
     await screen.findByRole("button", { name: "Log in Now !" });
-
-    // 确保 localStorage.setItem 被调用
-    // 确保 Login.js 正确地存储了 token，否则后续的认证流程会出错
-    expect(localStorage.setItem).toHaveBeenCalledWith("token", "mocked_token");
-
+  
+    // 确保 localStorage.setItem 被调用，并存储正确的 session ID
+    expect(localStorage.setItem).toHaveBeenCalledWith("JSESSIONID", "mocked_session_id");
+  
     // 确保导航到 "/"
     expect(mockedUsedNavigate).toHaveBeenCalledWith("/");
   });
+  
 });
