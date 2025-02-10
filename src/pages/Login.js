@@ -7,6 +7,7 @@ function Login({ setUser }) {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
+  const baseUrl = "http://form-flow-be.us-east-1.elasticbeanstalk.com";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,7 +17,7 @@ function Login({ setUser }) {
       formData.append("username", username);
       formData.append("password", password);
 
-      const response = await fetch("http://form-flow-be.us-east-1.elasticbeanstalk.com/login", {
+      const response = await fetch(baseUrl+"/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData.toString(), // 这里需要转成字符串
