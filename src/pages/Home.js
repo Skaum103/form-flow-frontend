@@ -3,7 +3,7 @@ import Survey from "../components/Survey/Survey";
 
 const Home = () => {
   const [apps, setApps] = useState([]);
-
+//test
   useEffect(() => {
     fetch("/api/applications", { credentials: "include" })
       .then(res => res.json())
