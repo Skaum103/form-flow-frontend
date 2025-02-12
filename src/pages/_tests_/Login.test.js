@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Login from "../Login";
+import React from "react";
 
 // 模拟react-router-dom 里的 useNavigate，以便在 Jest 测试中跟踪 页面跳转 是否正确发生。
 const mockedUsedNavigate = jest.fn();
