@@ -4,10 +4,12 @@ import "./Login.css"; // 复用 Login.css 的样式
 
 function Register() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
+  const baseUrl = "http://form-flow-be.us-east-1.elasticbeanstalk.com"; 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,17 +20,22 @@ function Register() {
     }
 
     try {
-      const response = await fetch("http://你的后端接口/api/register", {
+      const response = await fetch(baseUrl + "/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+        }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Registration failed. Try another username.");
+        throw new Error(data.message || "Registration failed");
       }
 
-      const data = await response.json();
       if (data.success) {
         alert("Registration successful! Please log in.");
         navigate("/login"); // 跳转到登录页
@@ -52,6 +59,16 @@ function Register() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Enter your username"
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
             required
           />
         </div>
