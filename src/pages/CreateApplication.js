@@ -1,10 +1,20 @@
 // src/pages/CreateApplication.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './CreateApplication.css';
 
 export default function CreateApplication() {
   const [applicationTitle, setApplicationTitle] = useState('');
   const [questions, setQuestions] = useState([]);
+  // const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   const sessionId = document.cookie.match(/jsessionid=([^;]+)/)?.[1];
+  //   if (!sessionId) {
+  //     alert('请先登录！');
+  //     navigate('/');
+  //   }
+  // }, [navigate]);
 
   const addQuestion = (type) => {
     setQuestions([...questions, { type, title: '', options: type !== 'text' ? [''] : [] }]);
@@ -51,6 +61,7 @@ export default function CreateApplication() {
           value={applicationTitle}
           onChange={(e) => setApplicationTitle(e.target.value)}
           placeholder="请输入文件标题"
+          className="input-field"
         />
       </div>
 
@@ -72,10 +83,11 @@ export default function CreateApplication() {
                 setQuestions(newQuestions);
               }}
               placeholder="请输入题目"
+              className="input-field"
             />
 
             {question.type !== 'text' && (
-              <div>
+              <div className="options-container">
                 {question.options.map((option, i) => (
                   <div key={i} className="option">
                     {question.type === 'single' ? (
@@ -92,6 +104,7 @@ export default function CreateApplication() {
                         setQuestions(newQuestions);
                       }}
                       placeholder="选项内容"
+                      className="input-field"
                     />
                   </div>
                 ))}
@@ -100,7 +113,7 @@ export default function CreateApplication() {
             )}
 
             {question.type === 'text' && (
-              <textarea placeholder="请输入回答" disabled />
+              <textarea placeholder="请输入回答" className="input-field" disabled />
             )}
 
             <button onClick={() => removeQuestion(index)}>删除题目</button>

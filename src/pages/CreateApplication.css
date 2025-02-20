@@ -49,10 +49,62 @@
   .submit-btn {
     display: block;
     width: 100%;
+    margin-bottom: 50px;
     background-color: #28a745;
   }
   
   .submit-btn:hover {
     background-color: #218838;
   }
+  /* CreateApplication.css */
+
+/* CreateApplication.css */
+
+/* 统一输入框样式 */
+.input-field {
+    width: 100%;
+    max-width: 600px;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+/* 控制单选和多选项容器 */
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 选项间距 */
+    margin-top: 10px;
+  }
+  
+  /* 每个选项的布局 */
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* 单选框/复选框与输入框的间距 */
+  }
+  
+  /* 选项输入框的宽度 */
+  .option input[type="text"] {
+    flex: 1; /* 让输入框占据剩余空间 */
+    max-width: 300px; /* 限制最大宽度 */
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  /* 单选和复选框样式 */
+  .option input[type="radio"],
+  .option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+  }
+  .options-container button{
+    width: 93%;
+  }
+  
   
