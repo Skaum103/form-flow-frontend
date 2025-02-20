@@ -12,11 +12,11 @@ export default function CreateApplication() {
   useEffect(() => {
     const sessionId = localStorage.getItem("JSESSIONID");
 
-    // console.log('Detected jsessionid:', sessionId);
+    console.log("Detected jsessionid:", sessionId);
 
     if (sessionId) {
-      document.cookie = `JSESSIONID=${sessionId}; path=/; SameSite=None`;
-      console.log("JSESSIONID set in cookie:", document.cookie);
+      document.cookie = `JSESSIONID=${sessionId}; path=/; SameSite=None;Secure`;
+      console.log("Cookie after setting:", document.cookie);
     } else {
       alert("Please log in first!");
       navigate("/");
@@ -63,13 +63,15 @@ export default function CreateApplication() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Accept": "application/json"
       },
-      credentials: "include",  // 允许发送 Cookie
+      credentials: "include", // 允许 Cookie 发送
       body: JSON.stringify(payload),
     })
-      .then((response) => response.json())
-      .then(() => alert("Submission successful!"))
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to submit");
+        return response.json();
+      })
+      .then((data) => alert("Submission successful!"))
       .catch((error) => console.error("Submission failed", error));
   };
 
