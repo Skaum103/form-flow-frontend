@@ -39,6 +39,16 @@
     border: 1px solid #ddd;
     border-radius: 4px;
   }
+  .question label {
+    display: block;
+    margin-bottom: 8px;
+    margin-left:3px;
+    font-weight: bold;
+  }
+  .question .input-field + button {
+    display: block;
+    margin-top: 10px;
+  }
   
   .option {
     display: flex;
@@ -104,7 +114,7 @@
     margin-right: 5px;
   }
   .options-container button{
-    width: 93%;
+    width: 16.3%;
   }
   
   

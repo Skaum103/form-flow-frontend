@@ -1,28 +1,38 @@
 // src/pages/CreateApplication.js
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './CreateApplication.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "./CreateApplication.css";
 
 export default function CreateApplication() {
-  const [applicationTitle, setApplicationTitle] = useState('');
+  const [surveyName, setSurveyName] = useState("");
   const [questions, setQuestions] = useState([]);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  const baseUrl = "http://form-flow-be.us-east-1.elasticbeanstalk.com";
 
-  // useEffect(() => {
-  //   const sessionId = document.cookie.match(/jsessionid=([^;]+)/)?.[1];
-  //   if (!sessionId) {
-  //     alert('请先登录！');
-  //     navigate('/');
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    const sessionId = localStorage.getItem("JSESSIONID");
+
+    // console.log('Detected jsessionid:', sessionId);
+
+    if (sessionId) {
+      document.cookie = `JSESSIONID=${sessionId}; path=/; SameSite=None`;
+      console.log("JSESSIONID set in cookie:", document.cookie);
+    } else {
+      alert("Please log in first!");
+      navigate("/");
+    }
+  }, [navigate]);
 
   const addQuestion = (type) => {
-    setQuestions([...questions, { type, title: '', options: type !== 'text' ? [''] : [] }]);
+    setQuestions([
+      ...questions,
+      { type, title: "", options: type !== "text" ? [""] : [] },
+    ]);
   };
 
   const addOption = (index) => {
     const newQuestions = [...questions];
-    newQuestions[index].options.push('');
+    newQuestions[index].options.push("");
     setQuestions(newQuestions);
   };
 
@@ -32,48 +42,66 @@ export default function CreateApplication() {
   };
 
   const submitApplication = () => {
-    const sessionId = document.cookie.match(/jsessionid=([^;]+)/)?.[1] || '';
-    const payload = {
-      title: applicationTitle,
-      questions,
-      sessionId
-    };
+    const payload = { "survey name": surveyName };
 
-    fetch('/api/application/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+    questions.forEach((question) => {
+      if (question.title.trim()) {
+        payload[question.title] = question; // 使用题目描述作为键
+      }
+    });
+
+    console.log("Final Payload:", JSON.stringify(payload, null, 2));
+
+    const sessionId = localStorage.getItem("JSESSIONID");
+    if (!sessionId) {
+      alert("Session expired, please log in again.");
+      navigate("/login");
+      return;
+    }
+
+    fetch(baseUrl + "/survey/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      credentials: "include",  // 允许发送 Cookie
+      body: JSON.stringify(payload),
     })
       .then((response) => response.json())
-      .then(() => alert('提交成功！'))
-      .catch((error) => console.error('提交失败', error));
+      .then(() => alert("Submission successful!"))
+      .catch((error) => console.error("Submission failed", error));
   };
 
   return (
     <div className="create-application">
-      <h1>创建新申请</h1>
+      <h1>Create New Survey</h1>
 
       <div className="form-group">
-        <label htmlFor="title">文件标题：</label>
+        <label htmlFor="surveyName">Survey Name:</label>
         <input
           type="text"
-          id="title"
-          value={applicationTitle}
-          onChange={(e) => setApplicationTitle(e.target.value)}
-          placeholder="请输入文件标题"
+          id="surveyName"
+          value={surveyName}
+          onChange={(e) => setSurveyName(e.target.value)}
+          placeholder="Enter survey name"
           className="input-field"
         />
       </div>
 
       <div className="question-section">
-        <h2>添加题目</h2>
-        <button onClick={() => addQuestion('single')}>+ 添加单选题</button>
-        <button onClick={() => addQuestion('multiple')}>+ 添加多选题</button>
-        <button onClick={() => addQuestion('text')}>+ 添加问答题</button>
+        <h2>Add Questions</h2>
+        <button onClick={() => addQuestion("single")}>
+          + Add Single Choice
+        </button>
+        <button onClick={() => addQuestion("multiple")}>
+          + Add Multiple Choice
+        </button>
+        <button onClick={() => addQuestion("text")}>+ Add Text Question</button>
 
         {questions.map((question, index) => (
           <div key={index} className="question">
-            <label>题目 {index + 1}：</label>
+            <label>Question {index + 1}:</label>
             <input
               type="text"
               value={question.title}
@@ -82,15 +110,15 @@ export default function CreateApplication() {
                 newQuestions[index].title = e.target.value;
                 setQuestions(newQuestions);
               }}
-              placeholder="请输入题目"
+              placeholder="Enter question"
               className="input-field"
             />
 
-            {question.type !== 'text' && (
+            {question.type !== "text" && (
               <div className="options-container">
                 {question.options.map((option, i) => (
                   <div key={i} className="option">
-                    {question.type === 'single' ? (
+                    {question.type === "single" ? (
                       <input type="radio" disabled />
                     ) : (
                       <input type="checkbox" disabled />
@@ -103,26 +131,32 @@ export default function CreateApplication() {
                         newQuestions[index].options[i] = e.target.value;
                         setQuestions(newQuestions);
                       }}
-                      placeholder="选项内容"
+                      placeholder="Enter option"
                       className="input-field"
                     />
                   </div>
                 ))}
-                <button onClick={() => addOption(index)}>+ 添加选项</button>
+                <button onClick={() => addOption(index)}>+ Add Option</button>
               </div>
             )}
 
-            {question.type === 'text' && (
-              <textarea placeholder="请输入回答" className="input-field" disabled />
+            {question.type === "text" && (
+              <textarea
+                placeholder="Enter answer"
+                className="input-field"
+                disabled
+              />
             )}
 
-            <button onClick={() => removeQuestion(index)}>删除题目</button>
+            <button onClick={() => removeQuestion(index)}>
+              Delete Question
+            </button>
           </div>
         ))}
       </div>
 
       <button className="submit-btn" onClick={submitApplication}>
-        提交申请
+        Submit Survey
       </button>
     </div>
   );
