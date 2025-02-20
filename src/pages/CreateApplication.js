@@ -63,6 +63,7 @@ export default function CreateApplication() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        'JSESSIONID': sessionId
       },
       credentials: "include", // 允许 Cookie 发送
       body: JSON.stringify(payload),
