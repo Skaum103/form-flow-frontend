@@ -5,6 +5,7 @@ import "./CreateApplication.css";
 
 export default function CreateApplication() {
   const [surveyName, setSurveyName] = useState("");
+  const [surveyDescription, setSurveyDescription] = useState("");
   const [questions, setQuestions] = useState([]);
   const navigate = useNavigate();
   const baseUrl = "http://form-flow-be.us-east-1.elasticbeanstalk.com";
@@ -12,12 +13,9 @@ export default function CreateApplication() {
   useEffect(() => {
     const sessionId = localStorage.getItem("JSESSIONID");
 
-    console.log("Detected jsessionid:", sessionId);
+    console.log("Detected sessionToken:", sessionId);
 
-    if (sessionId) {
-      document.cookie = `JSESSIONID=${sessionId}; path=/; SameSite=None;Secure`;
-      console.log("Cookie after setting:", document.cookie);
-    } else {
+    if (!sessionId) {
       alert("Please log in first!");
       navigate("/");
     }
@@ -41,39 +39,74 @@ export default function CreateApplication() {
     setQuestions(newQuestions);
   };
 
-  const submitApplication = () => {
-    const payload = { "survey name": surveyName };
-
-    questions.forEach((question) => {
-      if (question.title.trim()) {
-        payload[question.title] = question; // 使用题目描述作为键
-      }
-    });
-
-    console.log("Final Payload:", JSON.stringify(payload, null, 2));
-
-    const sessionId = localStorage.getItem("JSESSIONID");
-    if (!sessionId) {
+  const submitApplication = async () => {
+    const sessionToken = localStorage.getItem("JSESSIONID");
+    if (!sessionToken) {
       alert("Session expired, please log in again.");
       navigate("/login");
       return;
     }
 
-    fetch(baseUrl + "/survey/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        'JSESSIONID': sessionId
-      },
-      credentials: "include", // 允许 Cookie 发送
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to submit");
-        return response.json();
-      })
-      .then((data) => alert("Submission successful!"))
-      .catch((error) => console.error("Submission failed", error));
+    // Step 1: Create Survey
+    const createPayload = {
+      sessionToken: sessionToken,
+      surveyName: surveyName,
+      description: surveyDescription,
+    };
+
+    console.log("Create Payload:", JSON.stringify(createPayload, null, 2));
+
+    try {
+      const createResponse = await fetch(`${baseUrl}/survey/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(createPayload),
+      });
+
+      if (!createResponse.ok) throw new Error("Failed to create survey");
+
+      const createData = await createResponse.json();
+      console.log("Create Response:", createData);
+
+      const surveyId = createData.surveyId;
+
+      if (surveyId) {
+        // Step 2: Update Questions with type and order
+        const updatePayload = {
+          sessionToken: sessionToken,
+          surveyId: surveyId,
+          questions: questions.map((q, index) => ({
+            type: q.type,
+            question_order: index + 1, // 1-based index for order
+            description: q.title,
+            body: q.options.join(", "), // 将选项以逗号分隔
+          })),
+        };
+
+        console.log("Update Payload:", JSON.stringify(updatePayload, null, 2));
+
+        const updateResponse = await fetch(`${baseUrl}/survey/update_questions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatePayload),
+        });
+
+        if (!updateResponse.ok) throw new Error("Failed to update questions");
+
+        const updateData = await updateResponse.json();
+        console.log("Update Response:", updateData);
+
+        if (updateData.success) {
+          alert("Survey created and questions updated successfully!");
+          navigate("/");
+        } else {
+          alert("Failed to update questions.");
+        }
+      }
+    } catch (error) {
+      console.error("Submission failed", error);
+      alert("Submission failed: " + error.message);
+    }
   };
 
   return (
@@ -92,14 +125,22 @@ export default function CreateApplication() {
         />
       </div>
 
+      <div className="form-group">
+        <label htmlFor="surveyDescription">Survey Description:</label>
+        <input
+          type="text"
+          id="surveyDescription"
+          value={surveyDescription}
+          onChange={(e) => setSurveyDescription(e.target.value)}
+          placeholder="Enter survey description"
+          className="input-field"
+        />
+      </div>
+
       <div className="question-section">
         <h2>Add Questions</h2>
-        <button onClick={() => addQuestion("single")}>
-          + Add Single Choice
-        </button>
-        <button onClick={() => addQuestion("multiple")}>
-          + Add Multiple Choice
-        </button>
+        <button onClick={() => addQuestion("single")}>+ Add Single Choice</button>
+        <button onClick={() => addQuestion("multiple")}>+ Add Multiple Choice</button>
         <button onClick={() => addQuestion("text")}>+ Add Text Question</button>
 
         {questions.map((question, index) => (
@@ -151,9 +192,7 @@ export default function CreateApplication() {
               />
             )}
 
-            <button onClick={() => removeQuestion(index)}>
-              Delete Question
-            </button>
+            <button onClick={() => removeQuestion(index)}>Delete Question</button>
           </div>
         ))}
       </div>
