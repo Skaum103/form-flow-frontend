@@ -25,7 +25,14 @@ function Login({ setUser }) {
       });
 
       const data = await response.json();
-
+      
+      if (!data.success) {
+        const errorMessage = data.message && data.message.trim() !== "" ? data.message : "Login failed";
+        console.log("Setting Error Message:", errorMessage);
+        setErrorMsg(errorMessage);
+      }
+      
+      
       if (!response.ok) {
         throw new Error(data.message || "Invalid credentials");
       }

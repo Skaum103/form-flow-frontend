@@ -13,6 +13,11 @@ jest.mock("react-router-dom", () => ({
 describe("Login Component", () => {
   //每个测试前都会执行这个代码，确保 localStorage 是 mock 版本。
   beforeEach(() => {
+  jest.restoreAllMocks();
+  jest.clearAllMocks();
+  jest.resetModules();
+
+  global.fetch = jest.fn();
     Object.defineProperty(window, "localStorage", {
       value: {
         //让 localStorage.setItem 变成 Jest mock 函数，以便测试是否正确存储 token。
@@ -151,5 +156,35 @@ describe("Login Component", () => {
     // 确保导航到 "/"
     expect(mockedUsedNavigate).toHaveBeenCalledWith("/");
   });
+  test("shows default error message when login fails without message", async () => {
+    // **强制 fetch 重新 mock**
+    global.fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        json: () =>
+          Promise.resolve({
+            success: false,
+            message: "", // message 为空字符串
+          }),
+      })
+    );
+  
+    render(
+      <BrowserRouter>
+        <Login />
+      </BrowserRouter>
+    );
+  
+    fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
+  
+    // **确保 fetch 返回正确的 JSON**
+    const alertElement = await screen.findByRole("alert");
+    console.log("Displayed Error Message:", alertElement.textContent);
+  
+    expect(alertElement).toHaveTextContent("Invalid credentials");
+
+  });
+  
+  
   
 });
