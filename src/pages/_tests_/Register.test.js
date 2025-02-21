@@ -162,4 +162,43 @@ describe("Register Component", () => {
     fireEvent.click(screen.getByText("Log in"));
     expect(mockedUsedNavigate).toHaveBeenCalledWith("/login");
   });
+  test("shows default error message when registration fails without a message", async () => {
+    jest.spyOn(global, "fetch").mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        json: () => Promise.resolve({ success: false, message: "" }), // 这里 message 为空
+      })
+    );
+  
+    render(
+      <BrowserRouter>
+        <Register />
+      </BrowserRouter>
+    );
+  
+    fireEvent.click(screen.getByRole("button", { name: "Register" }));
+  
+    // 确保默认错误信息 "Registration failed." 被显示
+    expect(await screen.findByText("Registration failed", { exact: false })).toBeInTheDocument();
+  });
+  test("shows error message when registration fails with success: false", async () => {
+    jest.spyOn(global, "fetch").mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true, // 这里的 response.ok 是 true
+        json: () => Promise.resolve({ success: false, message: "Custom error message" }),
+      })
+    );
+  
+    render(
+      <BrowserRouter>
+        <Register />
+      </BrowserRouter>
+    );
+  
+    fireEvent.click(screen.getByRole("button", { name: "Register" }));
+  
+    // 确保 setErrorMsg("Custom error message") 被执行
+    expect(await screen.findByText("Custom error message")).toBeInTheDocument();
+  });
+  
 });
