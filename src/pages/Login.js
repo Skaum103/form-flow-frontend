@@ -38,7 +38,7 @@ function Login({ setUser }) {
       }
 
       if (data.success) {
-        localStorage.setItem("JSESSIONID", data.sessionToken);
+        localStorage.setItem("sessionToken", data.sessionToken);
         localStorage.setItem("username", username);
         setUser(username); // 立即更新状态，让 Header 重新渲染
         navigate("/"); // 登录成功后跳转首页或别的页面

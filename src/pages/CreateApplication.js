@@ -11,7 +11,7 @@ export default function CreateApplication() {
   const baseUrl = "http://form-flow-be.us-east-1.elasticbeanstalk.com";
 
   useEffect(() => {
-    const sessionId = localStorage.getItem("JSESSIONID");
+    const sessionId = localStorage.getItem("sessionToken");
 
     console.log("Detected sessionToken:", sessionId);
 
@@ -40,7 +40,7 @@ export default function CreateApplication() {
   };
 
   const submitApplication = async () => {
-    const sessionToken = localStorage.getItem("JSESSIONID");
+    const sessionToken = localStorage.getItem("sessionToken");
     if (!sessionToken) {
       alert("Session expired, please log in again.");
       navigate("/login");

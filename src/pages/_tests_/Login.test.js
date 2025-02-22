@@ -130,7 +130,7 @@ describe("Login Component", () => {
         json: () =>
           Promise.resolve({
             success: true,
-            JSESSIONID: "mocked_session_id", // 后端返回 JSESSIONID，而不是 token
+            sessionToken: "mocked_session_id", 
           }),
       })
     );
@@ -151,7 +151,7 @@ describe("Login Component", () => {
     await screen.findByRole("button", { name: "Log in Now !" });
   
     // 确保 localStorage.setItem 被调用，并存储正确的 session ID
-    expect(localStorage.setItem).toHaveBeenCalledWith("JSESSIONID", "mocked_session_id");
+    expect(localStorage.setItem).toHaveBeenCalledWith("sessionToken", "mocked_session_id");
   
     // 确保导航到 "/"
     expect(mockedUsedNavigate).toHaveBeenCalledWith("/");
