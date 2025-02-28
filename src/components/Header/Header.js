@@ -6,7 +6,7 @@ function Header({ user, setUser }) {
   const navigate = useNavigate();
   const handleLogout = () => {
     localStorage.removeItem("username");
-    localStorage.removeItem("JSESSIONID");
+    localStorage.removeItem("sessionToken");
     setUser(null);
     navigate("/");
   };

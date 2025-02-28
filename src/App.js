@@ -28,11 +28,6 @@ function App() {
         <Routes>
           {/* 使用 element 属性传入要渲染的组件 */}
           <Route path="/" element={<Home />} />
-          {/* <Route path="/application/:appId" element={<ApplicationDetail />} />
-          <Route
-            path="/application/:appId/questions"
-            element={<QuestionPage />}
-          /> */}
           <Route path="/CreateApplication" element={<CreateApplication />} />
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
