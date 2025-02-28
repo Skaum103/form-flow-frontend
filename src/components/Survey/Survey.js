@@ -7,7 +7,7 @@ const Survey = ({ survey }) => {
             <h3>{survey.surveyName}</h3>
             <p>{survey.description}</p>
             <button onClick={() => window.location.href = `/survey/${survey.surveyId}`}>
-                查看详情
+                Details
             </button>
         </div>
     );
