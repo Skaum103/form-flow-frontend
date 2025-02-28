@@ -8,39 +8,43 @@ const Home = () => {
     const navigate = useNavigate();
     const [surveys, setSurveys] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const surveysPerPage = 4;
+    const surveysPerPage = 8;
+    const baseUrl = "http://form-flow-be.us-east-1.elasticbeanstalk.com";
 
-    // 确保 `sessionToken` 有默认值，避免 `null` 影响 useEffect
+    // 确保 `sessionToken` 有默认值
     const sessionToken = localStorage.getItem("sessionToken") || "";
 
-    //  确保 `useEffect` 在所有渲染中执行，不受 `if` 影响
+    //  获取问卷数据
     useEffect(() => {
-        if (!sessionToken.trim()) return; // 仅在 sessionToken 存在时请求
+        if (!sessionToken.trim()) return; 
 
-        fetch("https://your-backend-api.com/surveys", {
+        fetch(baseUrl + "/survey/getSurvey", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ sessionToken }),
         })
         .then((response) => response.json())
-        .then((data) => setSurveys(data.surveys || []))
+        .then((data) => {
+            setSurveys(data.surveys || []);
+            setCurrentPage(1); // 确保默认从第一页开始
+        })
         .catch((error) => console.error("Error fetching surveys:", error));
     }, [sessionToken]);
 
-    //  确保分页计算不会超出数据范围
-    const totalPages = Math.ceil(surveys.length / surveysPerPage);
+    //  确保分页计算不会超出范围
+    const totalPages = Math.max(1, Math.ceil(surveys.length / surveysPerPage)); // 确保至少 1 页
     const indexOfLastSurvey = Math.min(currentPage * surveysPerPage, surveys.length);
     const indexOfFirstSurvey = (currentPage - 1) * surveysPerPage;
     const currentSurveys = surveys.slice(indexOfFirstSurvey, indexOfLastSurvey);
 
-    //  避免 `useEffect` 无限循环，防止 `setCurrentPage` 触发重复渲染
+    //  避免 `useEffect` 无限循环
     useEffect(() => {
         if (currentPage > totalPages) {
             setCurrentPage(totalPages);
         }
     }, [totalPages, currentPage]);
 
-    //  如果 sessionToken 为空，直接返回未登录界面
+    //  未登录界面
     if (!sessionToken.trim()) {
         return (
             <div className="home-container">
@@ -63,18 +67,18 @@ const Home = () => {
                 {currentSurveys.map((survey) => (
                     <Survey key={survey.surveyId} survey={survey} />
                 ))}
-                <div className="pagination">
-                    {Array.from({ length: totalPages }, (_, i) => (
-                        <button
-                            key={i + 1}
-                            //页面高亮
-                            className={currentPage === i + 1 ? "active" : ""}
-                            onClick={() => setCurrentPage(i + 1)}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
-                </div>
+            </div>
+            
+            <div className="pagination">
+                {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                        key={i + 1}
+                        className={currentPage === i + 1 ? "active" : ""}
+                        onClick={() => setCurrentPage(i + 1)}
+                    >
+                        {i + 1}
+                    </button>
+                ))}
             </div>
         </div>
     );

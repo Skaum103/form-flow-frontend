@@ -6,7 +6,7 @@ const Survey = ({ survey }) => {
         <div className="survey-card">
             <h3>{survey.surveyName}</h3>
             <p>{survey.description}</p>
-            <button onClick={() => window.location.href = `/survey/${survey.surveyId}`}>
+            <button>
                 Details
             </button>
         </div>

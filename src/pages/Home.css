@@ -48,3 +48,39 @@
     /* max-width: 600px; */
     border-radius: 10px;
 }
+/* 让 survey 列表在页面中居中显示 */
+.survey-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* 让分页按钮固定在右下角 */
+.pagination {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.pagination button {
+    padding: 8px 12px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.pagination button:hover {
+    background-color: #0056b3;
+}
+
+.pagination .active {
+    background-color: #003d80;
+    font-weight: bold;
+}
