@@ -65,7 +65,7 @@ const Home = () => {
         <div className="home-container">
             <div className="survey-list">
                 {currentSurveys.map((survey) => (
-                    <Survey key={survey.surveyId} survey={survey} />
+                    <Survey key={survey.id} survey={survey} />
                 ))}
             </div>
             
