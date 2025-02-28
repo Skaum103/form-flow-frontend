@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Survey from "../components/Survey/Survey";
 import "./Home.css";
 import "../components/Survey/Survey.css";
 
 const Home = () => {
-    // const navigate = useNavigate();
     const [surveys, setSurveys] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const surveysPerPage = 8;
