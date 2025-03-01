@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: center;
     height: 85vh;
-    padding: 20px;
+    padding: 0 20px 0 20px;
 }
 
 /* 主内容区域（左右布局） */
