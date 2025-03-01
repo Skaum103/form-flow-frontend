@@ -56,7 +56,7 @@ describe("Header Component", () => {
     );
     fireEvent.click(screen.getByText("Log out"));
     expect(localStorage.removeItem).toHaveBeenCalledWith("username");
-    expect(localStorage.removeItem).toHaveBeenCalledWith("JSESSIONID");
+    expect(localStorage.removeItem).toHaveBeenCalledWith("sessionToken");
     expect(setUserMock).toHaveBeenCalledWith(null);
     expect(mockedUsedNavigate).toHaveBeenCalledWith("/");
   });
