@@ -6,7 +6,8 @@ import Home from "./pages/Home";
 import CreateApplication from "./pages/CreateApplication";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-// import ApplicationDetail from "./pages/ApplicationDetail";
+// import QuestionPage from "./pages/QuestionPage";
+import ApplicationDetail from "./pages/ApplicationDetail";
 // import QuestionPage from "./pages/QuestionPage";
 function App() {
   //如果用户是第一次访问，user = null（未登录）。如果用户之前登录过（刷新页面后），user 会从 localStorage 里恢复，不会丢失登录状态
@@ -28,6 +29,7 @@ function App() {
         <Routes>
           {/* 使用 element 属性传入要渲染的组件 */}
           <Route path="/" element={<Home />} />
+          <Route path="/survey/:surveyId" element={<ApplicationDetail />} />
           <Route path="/CreateApplication" element={<CreateApplication />} />
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
