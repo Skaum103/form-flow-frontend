@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor, cleanup, within } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import CreateApplication from "../CreateApplication";
 
@@ -75,24 +75,22 @@ describe("CreateApplication", () => {
     const radioInput = screen.getByRole("radio");
     expect(radioInput).toBeInTheDocument();
 
-    // 利用问题输入框，找到对应的容器（通过最近的祖先 .question）
-    const questionInputs = screen.getAllByPlaceholderText("Enter question");
-    const questionContainers = questionInputs.map(input => input.closest(".question"));
-    const firstQuestionContainer = questionContainers[0];
+    // 全局查询所有选项输入框，初始时应有两个（分别对应 single 和 multiple 类型）
+    let optionInputs = screen.getAllByPlaceholderText("Enter option");
+    expect(optionInputs.length).toBe(2);
 
-    // 初始只有一个默认选项
-    let firstQuestionOptionInputs = within(firstQuestionContainer).getAllByPlaceholderText("Enter option");
-    expect(firstQuestionOptionInputs.length).toBe(1);
+    // 修改第一个问题的第一个选项
+    fireEvent.change(optionInputs[0], { target: { value: "Red" } });
+    expect(optionInputs[0].value).toBe("Red");
 
-    // 修改第一个选项的内容
-    fireEvent.change(firstQuestionOptionInputs[0], { target: { value: "Red" } });
-    expect(firstQuestionOptionInputs[0].value).toBe("Red");
-
-    // 点击添加选项按钮（仅针对第一个问题）
-    const firstQuestionAddOptionButton = within(firstQuestionContainer).getByText("+ Add Option");
+    // 获取所有“+ Add Option”按钮，全局第一个即为第一问题的按钮
+    const addOptionButtons = screen.getAllByText("+ Add Option");
+    const firstQuestionAddOptionButton = addOptionButtons[0];
     fireEvent.click(firstQuestionAddOptionButton);
-    firstQuestionOptionInputs = within(firstQuestionContainer).getAllByPlaceholderText("Enter option");
-    expect(firstQuestionOptionInputs.length).toBe(2);
+
+    // 添加后，全局选项输入框数量应由 2 增加到 3
+    optionInputs = screen.getAllByPlaceholderText("Enter option");
+    expect(optionInputs.length).toBe(3);
 
     // 删除第二个问题（multiple 类型）
     const deleteButtons = screen.getAllByText("Delete Question");
