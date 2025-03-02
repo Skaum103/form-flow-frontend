@@ -67,7 +67,7 @@ const Home = () => {
                 ))}
             </div>
             
-            <div className="pagination">
+            <div className="pagination" data-testid="pagination">
                 {Array.from({ length: totalPages }, (_, i) => (
                     <button
                         key={i + 1}
