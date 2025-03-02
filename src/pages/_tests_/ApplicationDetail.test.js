@@ -75,10 +75,10 @@ describe('ApplicationDetail Component', () => {
       )
     );
 
-    // 等待 UI 更新到显示问卷题目
-    await waitFor(() => expect(screen.getByText(/单选题测试/i)).toBeInTheDocument());
+    // 使用 findByText 等待 UI 更新完成
+    await screen.findByText(/单选题测试/i);
 
-    // 检查其他题目
+    // 后续断言不再放在 waitFor 内
     expect(screen.getByText(/多选题测试/i)).toBeInTheDocument();
     expect(screen.getByText(/文本题测试/i)).toBeInTheDocument();
 
@@ -113,6 +113,7 @@ describe('ApplicationDetail Component', () => {
       )
     );
 
+    // 只等待 fetch 调用完成
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
     expect(consoleErrorSpy).toHaveBeenCalledWith("Error fetching survey details:", expect.any(Error));
     expect(screen.getByText(/There are no questions in this survey!/i)).toBeInTheDocument();
