@@ -1,8 +1,8 @@
-process.noDeprecation = true; // 关闭 punycode 弃用警告
-
 import React from "react";
-import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, cleanup, within } from "@testing-library/react";
 import Home from "../Home";
+
+process.noDeprecation = true; // 关闭 punycode 弃用警告
 
 // 修正 Mock 方式，确保 `Survey` 组件正确渲染
 jest.mock("../../components/Survey/Survey", () => () => <div data-testid="mock-survey">Survey</div>);
@@ -35,10 +35,10 @@ describe("Home Component", () => {
     });
 
     render(<Home />);
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledTimes(1);
-      expect(screen.getAllByTestId("mock-survey").length).toBeGreaterThan(0);
-    });
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+    // 使用 findAllByTestId 等待元素出现
+    const surveyElements = await screen.findAllByTestId("mock-survey");
+    expect(surveyElements.length).toBeGreaterThan(0);
   });
 
   test("handles API fetch failure gracefully", async () => {
@@ -64,16 +64,17 @@ describe("Home Component", () => {
       })
     });
   
-    const { container } = render(<Home />);
+    render(<Home />);
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
   
     // 等待分页区域渲染完成
     await waitFor(() => {
-      expect(container.querySelector(".pagination")).toBeInTheDocument();
+      expect(screen.getByTestId("pagination")).toBeInTheDocument();
     });
   
-    // 直接从 pagination 容器中查询所有按钮
-    const paginationButtons = container.querySelectorAll(".pagination button");
+    // 查询所有分页按钮
+    const pagination = screen.getByTestId("pagination");
+    const paginationButtons = within(pagination).getAllByRole("button");
     expect(paginationButtons.length).toBeGreaterThan(1);
   
     // 模拟点击第二个分页按钮
@@ -83,5 +84,4 @@ describe("Home Component", () => {
     const surveysAfterPagination = await screen.findAllByTestId("mock-survey");
     expect(surveysAfterPagination.length).toBeGreaterThan(0);
   });
-  
 });
