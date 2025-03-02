@@ -42,15 +42,17 @@ describe("CreateApplication", () => {
         <CreateApplication />
       </MemoryRouter>
     );
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith("Please log in first!");
-      expect(mockNavigate).toHaveBeenCalledWith("/");
-    });
+    await waitFor(() =>
+      expect(window.alert).toHaveBeenCalledWith("Please log in first!")
+    );
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith("/")
+    );
   });
 
   test("adds single, multiple, and text questions and modifies them", async () => {
     localStorage.setItem("sessionToken", "abc123");
-    const { container } = render(
+    render(
       <MemoryRouter>
         <CreateApplication />
       </MemoryRouter>
@@ -73,8 +75,9 @@ describe("CreateApplication", () => {
     const radioInput = screen.getByRole("radio");
     expect(radioInput).toBeInTheDocument();
 
-    // 获取第一个问题的容器，通过其 class 名称
-    const questionContainers = container.getElementsByClassName("question");
+    // 利用问题输入框，找到对应的容器（通过最近的祖先 .question）
+    const questionInputs = screen.getAllByPlaceholderText("Enter question");
+    const questionContainers = questionInputs.map(input => input.closest(".question"));
     const firstQuestionContainer = questionContainers[0];
 
     // 初始只有一个默认选项
@@ -110,10 +113,12 @@ describe("CreateApplication", () => {
     const submitButton = screen.getByRole("button", { name: /submit survey/i });
     fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith("Session expired, please log in again.");
-      expect(mockNavigate).toHaveBeenCalledWith("/login");
-    });
+    await waitFor(() =>
+      expect(window.alert).toHaveBeenCalledWith("Session expired, please log in again.")
+    );
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith("/login")
+    );
   });
 
   test("handles fetch failure on survey creation", async () => {
@@ -135,9 +140,9 @@ describe("CreateApplication", () => {
     const submitButton = screen.getByRole("button", { name: /submit survey/i });
     fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Submission failed"));
-    });
+    await waitFor(() =>
+      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Submission failed"))
+    );
   });
 
   test("handles fetch failure on updating questions", async () => {
@@ -164,9 +169,9 @@ describe("CreateApplication", () => {
     const submitButton = screen.getByRole("button", { name: /submit survey/i });
     fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Submission failed"));
-    });
+    await waitFor(() =>
+      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Submission failed"))
+    );
   });
 
   test("submits the form successfully", async () => {
@@ -192,14 +197,12 @@ describe("CreateApplication", () => {
     const submitButton = screen.getByRole("button", { name: /submit survey/i });
     fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledTimes(2);
-    });
-
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith("Survey created and questions updated successfully!");
-    });
-
+    await waitFor(() =>
+      expect(global.fetch).toHaveBeenCalledTimes(2)
+    );
+    await waitFor(() =>
+      expect(window.alert).toHaveBeenCalledWith("Survey created and questions updated successfully!")
+    );
     expect(mockNavigate).toHaveBeenCalledWith("/");
   });
 
@@ -231,9 +234,9 @@ describe("CreateApplication", () => {
     const submitButton = screen.getByRole("button", { name: /submit survey/i });
     fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith("Failed to update questions.");
-    });
+    await waitFor(() =>
+      expect(window.alert).toHaveBeenCalledWith("Failed to update questions.")
+    );
   });
 
   test("handles create response without surveyId", async () => {
@@ -258,9 +261,8 @@ describe("CreateApplication", () => {
     const submitButton = screen.getByRole("button", { name: /submit survey/i });
     fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      // 仅执行了创建 API 调用，未进入更新流程
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-    });
+    await waitFor(() =>
+      expect(global.fetch).toHaveBeenCalledTimes(1)
+    );
   });
 });
