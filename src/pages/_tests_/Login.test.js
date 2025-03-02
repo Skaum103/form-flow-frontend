@@ -1,9 +1,10 @@
+// Login.test.js
 import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Login from "../Login";
 import React from "react";
 
-// 模拟react-router-dom 里的 useNavigate，以便在 Jest 测试中跟踪 页面跳转 是否正确发生。
+// 模拟 react-router-dom 里的 useNavigate，以便跟踪页面跳转
 const mockedUsedNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
@@ -11,16 +12,13 @@ jest.mock("react-router-dom", () => ({
 }));
 
 describe("Login Component", () => {
-  //每个测试前都会执行这个代码，确保 localStorage 是 mock 版本。
   beforeEach(() => {
-  jest.restoreAllMocks();
-  jest.clearAllMocks();
-  jest.resetModules();
-
-  global.fetch = jest.fn();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+    jest.resetModules();
+    global.fetch = jest.fn();
     Object.defineProperty(window, "localStorage", {
       value: {
-        //让 localStorage.setItem 变成 Jest mock 函数，以便测试是否正确存储 token。
         setItem: jest.fn(),
         getItem: jest.fn(),
         removeItem: jest.fn(),
@@ -36,25 +34,18 @@ describe("Login Component", () => {
         <Login />
       </BrowserRouter>
     );
-
-    // 检查是否渲染了必要的表单元素
-    // 确保标题正确渲染
     expect(
       screen.getByRole("heading", { level: 2, name: "Log in" })
     ).toBeInTheDocument();
-
     expect(
       screen.getByPlaceholderText("Please enter your username")
     ).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText("Please enter your password")
     ).toBeInTheDocument();
-
-    // 确保按钮存在
     expect(
       screen.getByRole("button", { name: "Log in Now !" })
     ).toBeInTheDocument();
-
     expect(screen.getByText("Does not have an account?")).toBeInTheDocument();
   });
 
@@ -65,24 +56,20 @@ describe("Login Component", () => {
         <Login />
       </BrowserRouter>
     );
-
     const usernameInput = screen.getByPlaceholderText(
       "Please enter your username"
     );
     const passwordInput = screen.getByPlaceholderText(
       "Please enter your password"
     );
-    //模拟用户在用户名输入框输入 "testuser"，在密码输入框输入 "password123"
     fireEvent.change(usernameInput, { target: { value: "testuser" } });
     fireEvent.change(passwordInput, { target: { value: "password123" } });
-    //断言输入框的值是否正确更新
     expect(usernameInput.value).toBe("testuser");
     expect(passwordInput.value).toBe("password123");
   });
 
-  // 测试 3：检查登录失败时是否显示错误消息
-  test("shows error message when login fails", async () => {
-    //Mock fetch 返回一个失败的响应 { success: false, message: "Invalid credentials" }。
+  // 测试 3：检查登录失败时（response.ok 为 false）的错误提示
+  test("shows error message when login fails (response.ok false)", async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: false,
@@ -90,101 +77,146 @@ describe("Login Component", () => {
           Promise.resolve({ success: false, message: "Invalid credentials" }),
       })
     );
-
     render(
       <BrowserRouter>
         <Login />
       </BrowserRouter>
     );
-
-    //模拟点击登录按钮
     fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
-
-    // 等待错误消息渲染，然后检查它的文本是否是 "Invalid credentials"
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Invalid credentials"
     );
   });
 
-  // 测试 4：检查点击 "Register Now" 是否跳转到注册页面
+  // 测试 4：点击 "Register Now" 是否跳转到注册页面
   test("navigates to register page when clicking 'Register Now'", () => {
     render(
       <BrowserRouter>
         <Login />
       </BrowserRouter>
     );
-
     const registerButton = screen.getByText("Register Now");
-    // 模拟点击注册按钮。
     fireEvent.click(registerButton);
-    //断言 useNavigate 是否被调用，并且路径是 "/register"
     expect(mockedUsedNavigate).toHaveBeenCalledWith("/register");
   });
 
-  //测试 5：检查成功登录是否存储 JSESSIONID 并跳转
+  // 测试 5：成功登录时存储 sessionToken 并跳转
   test("successful login stores session ID and navigates", async () => {
-    // Mock fetch 返回成功的响应
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: true,
         json: () =>
           Promise.resolve({
             success: true,
-            sessionToken: "mocked_session_id", 
+            sessionToken: "mocked_session_id",
           }),
       })
     );
-  
-    // Mock localStorage
-    jest.spyOn(global.localStorage, "setItem");
-  
+    const setUserMock = jest.fn();
     render(
       <BrowserRouter>
-        <Login setUser={jest.fn()} />
+        <Login setUser={setUserMock} />
       </BrowserRouter>
     );
-  
-    // 触发登录按钮点击
     fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
-  
-    // 等待异步操作完成
     await screen.findByRole("button", { name: "Log in Now !" });
-  
-    // 确保 localStorage.setItem 被调用，并存储正确的 session ID
-    expect(localStorage.setItem).toHaveBeenCalledWith("sessionToken", "mocked_session_id");
-  
-    // 确保导航到 "/"
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      "sessionToken",
+      "mocked_session_id"
+    );
     expect(mockedUsedNavigate).toHaveBeenCalledWith("/");
+    expect(setUserMock).toHaveBeenCalled(); // 验证 setUser 被调用
   });
+
+  // 测试 6：登录失败且返回空字符串 message 时，显示默认错误提示
   test("shows default error message when login fails without message", async () => {
-    // **强制 fetch 重新 mock**
     global.fetch.mockImplementationOnce(() =>
       Promise.resolve({
         ok: false,
         json: () =>
           Promise.resolve({
             success: false,
-            message: "", // message 为空字符串
+            message: "",
           }),
       })
     );
-  
     render(
       <BrowserRouter>
         <Login />
       </BrowserRouter>
     );
-  
     fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
-  
-    // **确保 fetch 返回正确的 JSON**
     const alertElement = await screen.findByRole("alert");
-    console.log("Displayed Error Message:", alertElement.textContent);
-  
     expect(alertElement).toHaveTextContent("Invalid credentials");
-
   });
-  
-  
-  
+
+  // 测试 7：response.ok 为 true 但 data.success 为 false 的情况
+  test("login failure with ok true but success false", async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            success: false,
+            message: "Wrong password",
+          }),
+      })
+    );
+    render(
+      <BrowserRouter>
+        <Login />
+      </BrowserRouter>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Wrong password");
+  });
+
+  // 测试 8：模拟 fetch 抛出异常的情况
+  test("handles exception when fetch fails", async () => {
+    global.fetch = jest.fn(() =>
+      Promise.reject(new Error("Network error"))
+    );
+    render(
+      <BrowserRouter>
+        <Login />
+      </BrowserRouter>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Network error");
+  });
+
+  // 测试 9：检查 fetch 调用时的参数是否正确（包括 body、header 等）
+  test("fetch is called with correct parameters", async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            success: true,
+            sessionToken: "123",
+          }),
+      })
+    );
+    const setUserMock = jest.fn();
+    render(
+      <BrowserRouter>
+        <Login setUser={setUserMock} />
+      </BrowserRouter>
+    );
+
+    const usernameInput = screen.getByPlaceholderText("Please enter your username");
+    const passwordInput = screen.getByPlaceholderText("Please enter your password");
+    fireEvent.change(usernameInput, { target: { value: "user1" } });
+    fireEvent.change(passwordInput, { target: { value: "pass1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Log in Now !" }));
+
+    await screen.findByRole("button", { name: "Log in Now !" });
+    expect(global.fetch).toHaveBeenCalled();
+    const fetchCall = global.fetch.mock.calls[0];
+    expect(fetchCall[0]).toBe("http://form-flow-be.us-east-1.elasticbeanstalk.com/auth/login");
+    expect(fetchCall[1].method).toBe("POST");
+    expect(fetchCall[1].headers["Content-Type"]).toBe("application/x-www-form-urlencoded");
+    expect(fetchCall[1].body).toContain("username=user1");
+    expect(fetchCall[1].body).toContain("password=pass1");
+  });
 });
