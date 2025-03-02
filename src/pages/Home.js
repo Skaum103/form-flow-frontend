@@ -3,16 +3,16 @@ import Survey from "../components/Survey/Survey";
 import "./Home.css";
 import "../components/Survey/Survey.css";
 
-const Home = () => {
+const Home = ({ initialCurrentPage = 1 }) => {
     const [surveys, setSurveys] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(initialCurrentPage);
     const surveysPerPage = 8;
     const baseUrl = "http://form-flow-be.us-east-1.elasticbeanstalk.com";
 
     // 确保 `sessionToken` 有默认值
     const sessionToken = localStorage.getItem("sessionToken") || "";
 
-    //  获取问卷数据
+    // 获取问卷数据
     useEffect(() => {
         if (!sessionToken.trim()) return; 
 
@@ -29,20 +29,20 @@ const Home = () => {
         .catch((error) => console.error("Error fetching surveys:", error));
     }, [sessionToken]);
 
-    //  确保分页计算不会超出范围
-    const totalPages = Math.max(1, Math.ceil(surveys.length / surveysPerPage)); // 确保至少 1 页
+    // 计算分页信息
+    const totalPages = Math.max(1, Math.ceil(surveys.length / surveysPerPage));
     const indexOfLastSurvey = Math.min(currentPage * surveysPerPage, surveys.length);
     const indexOfFirstSurvey = (currentPage - 1) * surveysPerPage;
     const currentSurveys = surveys.slice(indexOfFirstSurvey, indexOfLastSurvey);
 
-    //  避免 `useEffect` 无限循环
+    // 当当前页大于总页数时自动调整 currentPage
     useEffect(() => {
         if (currentPage > totalPages) {
             setCurrentPage(totalPages);
         }
     }, [totalPages, currentPage]);
 
-    //  未登录界面
+    // 未登录界面
     if (!sessionToken.trim()) {
         return (
             <div className="home-container">

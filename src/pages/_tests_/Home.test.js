@@ -4,9 +4,10 @@ import Home from "../Home";
 
 process.noDeprecation = true; // 关闭 punycode 弃用警告
 
-// 修正 Mock 方式，确保 `Survey` 组件正确渲染
+// 模拟 Survey 组件，避免实际渲染内部逻辑
 jest.mock("../../components/Survey/Survey", () => () => <div data-testid="mock-survey">Survey</div>);
 
+// 全局模拟 fetch
 global.fetch = jest.fn();
 
 describe("Home Component", () => {
@@ -16,7 +17,7 @@ describe("Home Component", () => {
   });
 
   afterEach(() => {
-    cleanup(); // 确保每次测试后清理 DOM
+    cleanup();
   });
 
   test("renders login view when sessionToken is missing", () => {
@@ -30,13 +31,15 @@ describe("Home Component", () => {
     localStorage.setItem("sessionToken", "mockToken");
     fetch.mockResolvedValueOnce({
       json: jest.fn().mockResolvedValue({
-        surveys: [{ surveyId: 1, title: "Survey 1" }, { surveyId: 2, title: "Survey 2" }]
+        surveys: [
+          { surveyId: 1, title: "Survey 1" },
+          { surveyId: 2, title: "Survey 2" }
+        ]
       })
     });
 
     render(<Home />);
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 使用 findAllByTestId 等待元素出现
     const surveyElements = await screen.findAllByTestId("mock-survey");
     expect(surveyElements.length).toBeGreaterThan(0);
   });
@@ -46,12 +49,10 @@ describe("Home Component", () => {
     fetch.mockRejectedValueOnce(new Error("Fetch failed"));
 
     jest.spyOn(console, "error").mockImplementation(() => {});
-
     render(<Home />);
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     expect(screen.queryAllByTestId("mock-survey").length).toBe(0);
     expect(console.error).toHaveBeenCalledWith("Error fetching surveys:", expect.any(Error));
-
     console.error.mockRestore();
   });
 
@@ -59,29 +60,41 @@ describe("Home Component", () => {
     localStorage.setItem("sessionToken", "mockToken");
     fetch.mockResolvedValueOnce({
       json: jest.fn().mockResolvedValue({
-        // 返回 150 个问卷数据，确保分页控件足够多
-        surveys: Array.from({ length: 150 }, (_, i) => ({ surveyId: i + 1, title: `Survey ${i + 1}` }))
+        surveys: Array.from({ length: 150 }, (_, i) => ({
+          surveyId: i + 1,
+          title: `Survey ${i + 1}`
+        }))
       })
     });
-  
+
     render(<Home />);
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-  
-    // 等待分页区域渲染完成
     await waitFor(() => {
       expect(screen.getByTestId("pagination")).toBeInTheDocument();
     });
-  
-    // 查询所有分页按钮
     const pagination = screen.getByTestId("pagination");
     const paginationButtons = within(pagination).getAllByRole("button");
     expect(paginationButtons.length).toBeGreaterThan(1);
-  
-    // 模拟点击第二个分页按钮
     fireEvent.click(paginationButtons[1]);
-  
-    // 确认点击分页按钮后当前页问卷正常渲染
     const surveysAfterPagination = await screen.findAllByTestId("mock-survey");
     expect(surveysAfterPagination.length).toBeGreaterThan(0);
+  });
+
+  // 新增测试用例：利用 initialCurrentPage=2 且模拟 fetch 返回永远不 resolve，
+  // 使得 surveys 始终保持初始 []（totalPages=1），从而触发第二个 useEffect 分支调整 currentPage 到 1
+  test("adjusts currentPage when currentPage is greater than totalPages", async () => {
+    localStorage.setItem("sessionToken", "mockToken");
+    // 模拟 fetch 返回永远不 resolve
+    fetch.mockImplementationOnce(() => new Promise(() => {}));
+    render(<Home initialCurrentPage={2} />);
+    // 等待 effect 执行后，分页区域应只显示 1 个按钮，并且处于 active 状态
+    await waitFor(
+      () => {
+        const pagination = screen.getByTestId("pagination");
+        const buttons = within(pagination).getAllByRole("button");
+        return buttons.length === 1 && buttons[0].classList.contains("active");
+      },
+      { timeout: 500 }
+    );
   });
 });
