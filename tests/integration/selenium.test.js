@@ -134,7 +134,7 @@ async function runTests() {
         let detailHeader = await driver.findElement(By.tagName("h2"));
         assert.strictEqual(await detailHeader.getText(), "Survey Questions", "Survey header does not match!");
 
-        console.log("✅ Successfully entered survey details page");
+        console.log("✅ Successfully entered survey details page and verified content");
 
     } finally {
         await driver.quit();
