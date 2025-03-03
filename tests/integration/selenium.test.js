@@ -1,6 +1,6 @@
 const { Builder, By, Key, until } = require("selenium-webdriver");
 const chai = require("chai");
-const expect = chai.expect;
+const assert = chai.assert; // 这里添加 assert 变量
 require("chromedriver");
 
 const baseUrl = "http://localhost:3000";
@@ -132,8 +132,7 @@ async function runTests() {
 
         // **10. Verify survey details page content**
         let detailHeader = await driver.findElement(By.tagName("h2"));
-        expect(await detailHeader.getText()).to.be.a("string").that.equals("Survey Questions");
-
+        assert.strictEqual(await detailHeader.getText(), "Survey Questions", "Survey header does not match!");
 
         console.log("✅ Successfully entered survey details page");
 
