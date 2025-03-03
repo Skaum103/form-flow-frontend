@@ -132,7 +132,8 @@ async function runTests() {
 
         // **10. Verify survey details page content**
         let detailHeader = await driver.findElement(By.tagName("h2"));
-        expect(await detailHeader.getText()).to.equal("Survey Questions");
+        expect(await detailHeader.getText()).toEqual("Survey Questions");
+
         console.log("✅ Successfully entered survey details page");
 
     } finally {
