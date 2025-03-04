@@ -103,10 +103,12 @@
     text-decoration: underline;
     cursor: pointer;
     padding: 0;
+    outline: none;
   }
   
   .register-link:hover {
     color: #0056b3;
     text-decoration: underline;
+    background: none !important;
   }
   
