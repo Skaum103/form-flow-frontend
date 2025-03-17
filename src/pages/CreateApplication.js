@@ -6,6 +6,7 @@ import "./CreateApplication.css";
 export default function CreateApplication() {
   const [surveyName, setSurveyName] = useState("");
   const [surveyDescription, setSurveyDescription] = useState("");
+  const [accessControl, setAccessControl] = useState("");
   const [questions, setQuestions] = useState([]);
   const navigate = useNavigate();
   const baseUrl = "http://form-flow-be.us-east-1.elasticbeanstalk.com";
@@ -52,6 +53,7 @@ export default function CreateApplication() {
       sessionToken: sessionToken,
       surveyName: surveyName,
       description: surveyDescription,
+      accessControl: accessControl,
     };
 
     console.log("Create Payload:", JSON.stringify(createPayload, null, 2));
@@ -85,11 +87,14 @@ export default function CreateApplication() {
 
         console.log("Update Payload:", JSON.stringify(updatePayload, null, 2));
 
-        const updateResponse = await fetch(`${baseUrl}/survey/update_questions`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatePayload),
-        });
+        const updateResponse = await fetch(
+          `${baseUrl}/survey/update_questions`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatePayload),
+          }
+        );
 
         if (!updateResponse.ok) throw new Error("Failed to update questions");
 
@@ -137,10 +142,26 @@ export default function CreateApplication() {
         />
       </div>
 
+      <div className="form-group">
+        <label htmlFor="accessControl">Access Control:</label>
+        <input
+          type="text"
+          id="accessControl"
+          value={accessControl}
+          onChange={(e) => setAccessControl(e.target.value)}
+          placeholder="Enter usernames separated by commas"
+          className="input-field"
+        />
+      </div>
+      
       <div className="question-section">
         <h2>Add Questions</h2>
-        <button onClick={() => addQuestion("single")}>+ Add Single Choice</button>
-        <button onClick={() => addQuestion("multiple")}>+ Add Multiple Choice</button>
+        <button onClick={() => addQuestion("single")}>
+          + Add Single Choice
+        </button>
+        <button onClick={() => addQuestion("multiple")}>
+          + Add Multiple Choice
+        </button>
         <button onClick={() => addQuestion("text")}>+ Add Text Question</button>
 
         {questions.map((question, index) => (
@@ -192,7 +213,9 @@ export default function CreateApplication() {
               />
             )}
 
-            <button onClick={() => removeQuestion(index)}>Delete Question</button>
+            <button onClick={() => removeQuestion(index)}>
+              Delete Question
+            </button>
           </div>
         ))}
       </div>

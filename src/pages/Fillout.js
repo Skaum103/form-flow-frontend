@@ -14,7 +14,7 @@ const Fillout = () => {
   useEffect(() => {
     if (!sessionToken.trim()) return;
 
-    fetch(`${baseUrl}/survey/get_survey_detail`, {
+    fetch(`${baseUrl}/survey/get_accessible_survey`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sessionToken, surveyId }),
