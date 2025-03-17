@@ -40,14 +40,17 @@ function Header({ user, setUser }) {
                 Create Application
               </NavLink>
             </li>
-            {/* <li>
+            <li>
+              {/* NavLink 可自动给当前激活的路由添加类名或内联样式 */}
               <NavLink
-                to="/my-answers"
-                className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+                to="/TakeSurvey"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
               >
-                我的答题
+                Take Survey
               </NavLink>
-            </li> */}
+            </li>
           </ul>
         </nav>
       </div>
