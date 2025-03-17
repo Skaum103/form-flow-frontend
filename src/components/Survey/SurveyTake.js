@@ -6,7 +6,7 @@ const SurveyTake = ({ survey }) => {
     const navigate = useNavigate();
 
     const handleDetailsClick = () => {
-        navigate(`/survey/${survey.surveyId}`); // 跳转到问卷详情页面
+        navigate(`/Fillout/${survey.surveyId}`); // 跳转到问卷详情页面
     };
 
     return (

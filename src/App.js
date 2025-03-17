@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 // import QuestionPage from "./pages/QuestionPage";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import TakeSurvey from "./pages/TakeSurvey";
+import Fillout from "./pages/Fillout";
 // import QuestionPage from "./pages/QuestionPage";
 function App() {
   //如果用户是第一次访问，user = null（未登录）。如果用户之前登录过（刷新页面后），user 会从 localStorage 里恢复，不会丢失登录状态
@@ -33,6 +34,7 @@ function App() {
           <Route path="/survey/:surveyId" element={<ApplicationDetail />} />
           <Route path="/CreateApplication" element={<CreateApplication />} />
           <Route path="/TakeSurvey" element={<TakeSurvey />} />
+          <Route path="/Fillout/:surveyId" element={<Fillout />} />
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
         </Routes>
