@@ -22,10 +22,7 @@ describe("Home Component", () => {
 
   test("renders login view when sessionToken is missing", () => {
     render(<Home />);
-    expect(
-      screen.getByText("The refreshingly different survey builder")
-    ).toBeInTheDocument();
-    // 同时检查图片是否存在
+    expect(screen.getByText("The refreshingly different survey builder")).toBeInTheDocument();
     expect(screen.getByAltText("Survey UI")).toBeInTheDocument();
   });
 
@@ -50,16 +47,26 @@ describe("Home Component", () => {
     localStorage.setItem("sessionToken", "mockToken");
     fetch.mockRejectedValueOnce(new Error("Fetch failed"));
 
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
     render(<Home />);
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    expect(screen.queryAllByTestId("mock-survey").length).toBe(0);
-    expect(console.error).toHaveBeenCalledWith("Error fetching surveys:", expect.any(Error));
-    console.error.mockRestore();
+    expect(screen.queryAllByTestId("mock-survey")).toHaveLength(0);
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Error fetching surveys:", expect.any(Error));
+
+    await waitFor(() => {
+      const paginationButtons = within(screen.getByTestId("pagination")).getAllByRole("button");
+      expect(paginationButtons.length).toBe(1);
+    });
+    await waitFor(() => {
+      const paginationButtons = within(screen.getByTestId("pagination")).getAllByRole("button");
+      expect(paginationButtons[0]).toHaveClass("active");
+    });
+    consoleErrorSpy.mockRestore();
   });
 
   test("renders pagination and handles page change", async () => {
     localStorage.setItem("sessionToken", "mockToken");
+    // 150 个问卷数据，totalPages = Math.ceil(150/8) = 19
     fetch.mockResolvedValueOnce({
       json: jest.fn().mockResolvedValue({
         surveys: Array.from({ length: 150 }, (_, i) => ({
@@ -75,18 +82,21 @@ describe("Home Component", () => {
       expect(screen.getByTestId("pagination")).toBeInTheDocument();
     });
     const pagination = screen.getByTestId("pagination");
-    const paginationButtons = within(pagination).getAllByRole("button");
-    expect(paginationButtons.length).toBeGreaterThan(1);
-    // 初始页应为 1
+    await waitFor(() => {
+      const paginationButtons = within(pagination).getAllByRole("button");
+      expect(paginationButtons.length).toBe(19);
+    });
+    // 初始页应显示 8 问卷
     let surveyItems = screen.getAllByTestId("mock-survey");
     expect(surveyItems).toHaveLength(8);
+    const paginationButtons = within(pagination).getAllByRole("button");
     // 点击第 2 页按钮
     fireEvent.click(paginationButtons[1]);
-    const surveysAfterPagination = await screen.findAllByTestId("mock-survey");
-    // 页面 2 依然显示 8 个问卷（或最后一页可能少于 8 个，但这里数据足够）
-    expect(surveysAfterPagination.length).toBe(8);
-    // 检查第二个按钮带 active 样式
-    expect(paginationButtons[1]).toHaveClass("active");
+    await waitFor(() => {
+      const surveysAfterPagination = screen.getAllByTestId("mock-survey");
+      expect(surveysAfterPagination).toHaveLength(8);
+    });
+    expect(within(pagination).getAllByRole("button")[1]).toHaveClass("active");
   });
 
   test("adjusts currentPage when currentPage is greater than totalPages", async () => {
@@ -98,10 +108,13 @@ describe("Home Component", () => {
       })
     });
     render(<Home initialCurrentPage={2} />);
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     await waitFor(() => {
-      const pagination = screen.getByTestId("pagination");
-      const buttons = within(pagination).getAllByRole("button");
-      expect(buttons).toHaveLength(1);
+      const buttons = within(screen.getByTestId("pagination")).getAllByRole("button");
+      expect(buttons.length).toBe(1);
+    });
+    await waitFor(() => {
+      const buttons = within(screen.getByTestId("pagination")).getAllByRole("button");
       expect(buttons[0]).toHaveClass("active");
     });
   });
@@ -115,12 +128,10 @@ describe("Home Component", () => {
     });
     render(<Home />);
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 无问卷数据时不应渲染 Survey 组件
     expect(screen.queryAllByTestId("mock-survey")).toHaveLength(0);
-    // 分页区域依然显示 1 页
     const pagination = screen.getByTestId("pagination");
     const buttons = within(pagination).getAllByRole("button");
-    expect(buttons).toHaveLength(1);
+    expect(buttons.length).toBe(1);
     expect(buttons[0]).toHaveClass("active");
   });
 });
