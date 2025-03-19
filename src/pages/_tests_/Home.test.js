@@ -25,6 +25,8 @@ describe("Home Component", () => {
     expect(
       screen.getByText("The refreshingly different survey builder")
     ).toBeInTheDocument();
+    // 同时检查图片是否存在
+    expect(screen.getByAltText("Survey UI")).toBeInTheDocument();
   });
 
   test("fetches surveys and renders them when sessionToken exists", async () => {
@@ -75,26 +77,50 @@ describe("Home Component", () => {
     const pagination = screen.getByTestId("pagination");
     const paginationButtons = within(pagination).getAllByRole("button");
     expect(paginationButtons.length).toBeGreaterThan(1);
+    // 初始页应为 1
+    let surveyItems = screen.getAllByTestId("mock-survey");
+    expect(surveyItems).toHaveLength(8);
+    // 点击第 2 页按钮
     fireEvent.click(paginationButtons[1]);
     const surveysAfterPagination = await screen.findAllByTestId("mock-survey");
-    expect(surveysAfterPagination.length).toBeGreaterThan(0);
+    // 页面 2 依然显示 8 个问卷（或最后一页可能少于 8 个，但这里数据足够）
+    expect(surveysAfterPagination.length).toBe(8);
+    // 检查第二个按钮带 active 样式
+    expect(paginationButtons[1]).toHaveClass("active");
   });
 
-  // 新增测试用例：利用 initialCurrentPage=2 且模拟 fetch 返回永远不 resolve，
-  // 使得 surveys 始终保持初始 []（totalPages=1），从而触发第二个 useEffect 分支调整 currentPage 到 1
   test("adjusts currentPage when currentPage is greater than totalPages", async () => {
     localStorage.setItem("sessionToken", "mockToken");
-    // 模拟 fetch 返回永远不 resolve
-    fetch.mockImplementationOnce(() => new Promise(() => {}));
+    // 模拟返回空的 surveys 数组
+    fetch.mockResolvedValueOnce({
+      json: jest.fn().mockResolvedValue({
+        surveys: []
+      })
+    });
     render(<Home initialCurrentPage={2} />);
-    // 等待 effect 执行后，分页区域应只显示 1 个按钮，并且处于 active 状态
-    await waitFor(
-      () => {
-        const pagination = screen.getByTestId("pagination");
-        const buttons = within(pagination).getAllByRole("button");
-        return buttons.length === 1 && buttons[0].classList.contains("active");
-      },
-      { timeout: 500 }
-    );
+    await waitFor(() => {
+      const pagination = screen.getByTestId("pagination");
+      const buttons = within(pagination).getAllByRole("button");
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0]).toHaveClass("active");
+    });
+  });
+
+  test("renders empty surveys correctly when surveys array is empty", async () => {
+    localStorage.setItem("sessionToken", "mockToken");
+    fetch.mockResolvedValueOnce({
+      json: jest.fn().mockResolvedValue({
+        surveys: []
+      })
+    });
+    render(<Home />);
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+    // 无问卷数据时不应渲染 Survey 组件
+    expect(screen.queryAllByTestId("mock-survey")).toHaveLength(0);
+    // 分页区域依然显示 1 页
+    const pagination = screen.getByTestId("pagination");
+    const buttons = within(pagination).getAllByRole("button");
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]).toHaveClass("active");
   });
 });
