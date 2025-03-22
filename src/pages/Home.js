@@ -25,6 +25,7 @@ const Home = ({ initialCurrentPage = 1 }) => {
         .then((data) => {
             setSurveys(data.surveys || []);
             setCurrentPage(1); // 确保默认从第一页开始
+            console.log("Fetched surveys home:", data.surveys);
         })
         .catch((error) => console.error("Error fetching surveys:", error));
     }, [sessionToken]);

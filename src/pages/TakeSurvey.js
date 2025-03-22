@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SurveyTake from "../components/Survey/SurveyTake";
+import Survey from "../components/Survey/Survey";
 import "./TakeSurvey.css";
 import "../components/Survey/Survey.css";
 
@@ -16,7 +17,7 @@ const Home = ({ initialCurrentPage = 1 }) => {
     useEffect(() => {
         if (!sessionToken.trim()) return; 
 
-        fetch(baseUrl + "/survey/getSurvey", {
+        fetch(baseUrl + "/survey/get_accessible_survey", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ sessionToken }),
@@ -25,6 +26,7 @@ const Home = ({ initialCurrentPage = 1 }) => {
         .then((data) => {
             setSurveys(data.surveys || []);
             setCurrentPage(1); // 确保默认从第一页开始
+            console.log("Fetched surveys:", data.surveys);
         })
         .catch((error) => console.error("Error fetching surveys:", error));
     }, [sessionToken]);
