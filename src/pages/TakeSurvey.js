@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import SurveyTake from "../components/Survey/SurveyTake";
-import Survey from "../components/Survey/Survey";
 import "./TakeSurvey.css";
 import "../components/Survey/Survey.css";
 
