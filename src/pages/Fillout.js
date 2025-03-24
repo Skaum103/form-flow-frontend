@@ -27,6 +27,16 @@ const Fillout = () => {
   }, [surveyId, sessionToken]);
 
   const handleSubmit = () => {
+    
+    for (const q of questions) {
+      if (q.type === "text") {
+        const answer = answers[q.id];
+        if (!answer || answer.trim() === "") {
+          alert(`Please fill out the text question: "${q.description}"`);
+          return; // 阻止提交
+        }
+      }
+    }
     const answersArray = questions.map((q) => answers[q.id] || "");
     const finalAnswers = answersArray.join(";");
 
