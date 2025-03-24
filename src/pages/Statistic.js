@@ -61,7 +61,7 @@ const ApplicationDetail = () => {
     return Object.entries(rawStats).map(([key, value]) => {
       const optionIndex = parseInt(key, 10) - 1;
       return {
-        name: optionList[optionIndex] || `选项${key}`,
+        name: optionList[optionIndex] || `OPTION${key}`,
         value: value,
       };
     });
@@ -69,7 +69,7 @@ const ApplicationDetail = () => {
 
   return (
     <div className="question-container">
-      <h2>Survey Questions</h2>
+      <h2>Survey Satistic</h2>
       {questions.length === 0 ? (
         <p>There are no questions in this survey!</p>
       ) : (
@@ -107,7 +107,7 @@ const ApplicationDetail = () => {
             ) : (
               <textarea
                 className="text-answer"
-                placeholder="Enter your answer here..."
+                placeholder="Text questions do not provide statistics."
                 disabled
               />
             )}
