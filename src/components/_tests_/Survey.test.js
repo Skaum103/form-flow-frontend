@@ -3,64 +3,62 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Survey from "../Survey/Survey";
 
-// Mock react-router-dom 的 useNavigate，使其返回一个模拟函数
+// 🟡 mock useNavigate 返回 mock 函数
+const mockedNavigate = jest.fn();
 jest.mock("react-router-dom", () => {
   const originalModule = jest.requireActual("react-router-dom");
   return {
     ...originalModule,
-    useNavigate: jest.fn(),
+    useNavigate: () => mockedNavigate,
   };
 });
 
 describe("Survey Component", () => {
-  const mockedNavigate = jest.fn();
+  const surveyData = {
+    surveyId: 1,
+    surveyName: "Test Survey",
+    description: "A test survey description",
+  };
 
   beforeEach(() => {
-    // 每个测试前重置 useNavigate 的返回值
-    require("react-router-dom").useNavigate.mockReturnValue(mockedNavigate);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
+    mockedNavigate.mockClear(); // 清理调用记录
   });
 
   test("renders Survey component correctly", () => {
-    const surveyData = {
-      surveyId: 1,
-      surveyName: "Test Survey",
-      description: "A test survey description",
-    };
-
     render(
       <MemoryRouter>
         <Survey survey={surveyData} />
       </MemoryRouter>
     );
 
-    // 检查标题、描述及按钮是否正确渲染
     expect(screen.getByRole("heading", { name: /Test Survey/i })).toBeInTheDocument();
     expect(screen.getByText(/A test survey description/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Details/i })).toBeInTheDocument();
   });
 
   test("navigates to survey details when Details button is clicked", () => {
-    const surveyData = {
-      surveyId: 1,
-      surveyName: "Test Survey",
-      description: "A test survey description",
-    };
-
     render(
       <MemoryRouter>
         <Survey survey={surveyData} />
       </MemoryRouter>
     );
 
-    // 点击 Details 按钮
     const button = screen.getByRole("button", { name: /Details/i });
     fireEvent.click(button);
 
-    // 验证 useNavigate 被调用，并传入正确的 URL 参数
     expect(mockedNavigate).toHaveBeenCalledWith("/survey/1");
+  });
+
+  test("navigates to statistic page when Statistic button is clicked", () => {
+    render(
+      <MemoryRouter>
+        <Survey survey={surveyData} />
+      </MemoryRouter>
+    );
+
+    const button = screen.getByRole("button", { name: /Statistic/i });
+    fireEvent.click(button);
+
+    expect(mockedNavigate).toHaveBeenCalledWith("/Statistic/1");
   });
 });
