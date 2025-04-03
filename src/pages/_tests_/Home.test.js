@@ -1,30 +1,30 @@
-// import React from "react";
-// import { render, screen, fireEvent, waitFor, cleanup, within } from "@testing-library/react";
-// import Home from "../Home";
+import React from "react";
+import { render, screen, fireEvent, waitFor, cleanup, within } from "@testing-library/react";
+import Home from "../Home";
 
-// process.noDeprecation = true; // 关闭 punycode 弃用警告
+process.noDeprecation = true; // 关闭 punycode 弃用警告
 
-// // 模拟 Survey 组件，避免实际渲染内部逻辑
-// jest.mock("../../components/Survey/Survey", () => () => <div data-testid="mock-survey">Survey</div>);
+// 模拟 Survey 组件，避免实际渲染内部逻辑
+jest.mock("../../components/Survey/Survey", () => () => <div data-testid="mock-survey">Survey</div>);
 
-// // 全局模拟 fetch
-// global.fetch = jest.fn();
+// 全局模拟 fetch
+global.fetch = jest.fn();
 
-// describe("Home Component", () => {
-//   beforeEach(() => {
-//     fetch.mockClear();
-//     localStorage.clear();
-//   });
+describe("Home Component", () => {
+  beforeEach(() => {
+    fetch.mockClear();
+    localStorage.clear();
+  });
 
-//   afterEach(() => {
-//     cleanup();
-//   });
+  afterEach(() => {
+    cleanup();
+  });
 
-//   test("renders login view when sessionToken is missing", () => {
-//     render(<Home />);
-//     expect(screen.getByText("The refreshingly different survey builder")).toBeInTheDocument();
-//     expect(screen.getByAltText("Survey UI")).toBeInTheDocument();
-//   });
+  test("renders login view when sessionToken is missing", () => {
+    render(<Home />);
+    expect(screen.getByText("The refreshingly different survey builder")).toBeInTheDocument();
+    expect(screen.getByAltText("Survey UI")).toBeInTheDocument();
+  });
 
 //   test("fetches surveys and renders them when sessionToken exists", async () => {
 //     localStorage.setItem("sessionToken", "mockToken");
@@ -134,4 +134,4 @@
 //     expect(buttons.length).toBe(1);
 //     expect(buttons[0]).toHaveClass("active");
 //   });
-// });
+});

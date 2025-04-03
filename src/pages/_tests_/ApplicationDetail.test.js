@@ -1,34 +1,34 @@
-// const React = require('react');
-// const { render, screen, waitFor, fireEvent } = require('@testing-library/react');
-// const ApplicationDetail = require('../ApplicationDetail').default;
-// const { BrowserRouter } = require('react-router-dom');
+const React = require('react');
+const { render, screen, waitFor, fireEvent } = require('@testing-library/react');
+const ApplicationDetail = require('../ApplicationDetail').default;
+const { BrowserRouter } = require('react-router-dom');
 
-// // 模拟 react-router-dom 中的 useParams 和 useNavigate
-// jest.mock('react-router-dom', () => {
-//   const actual = jest.requireActual('react-router-dom');
-//   return {
-//     ...actual,
-//     useParams: () => ({ surveyId: '123' }),
-//     useNavigate: jest.fn(),
-//   };
-// });
+// 模拟 react-router-dom 中的 useParams 和 useNavigate
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return {
+    ...actual,
+    useParams: () => ({ surveyId: '123' }),
+    useNavigate: jest.fn(),
+  };
+});
 
-// describe('ApplicationDetail Component', () => {
-//   beforeEach(() => {
-//     localStorage.clear();
-//     jest.restoreAllMocks();
-//   });
+describe('ApplicationDetail Component', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    jest.restoreAllMocks();
+  });
 
-//   test('当 sessionToken 为空时，显示无题目提示', () => {
-//     localStorage.setItem('sessionToken', ''); // 空 token
-//     render(
-//       React.createElement(BrowserRouter, null,
-//         React.createElement(ApplicationDetail, null)
-//       )
-//     );
-//     expect(screen.getByText(/Survey Questions/i)).toBeInTheDocument();
-//     expect(screen.getByText(/There are no questions in this survey!/i)).toBeInTheDocument();
-//   });
+  test('当 sessionToken 为空时，显示无题目提示', () => {
+    localStorage.setItem('sessionToken', ''); // 空 token
+    render(
+      React.createElement(BrowserRouter, null,
+        React.createElement(ApplicationDetail, null)
+      )
+    );
+    expect(screen.getByText(/Survey Questions/i)).toBeInTheDocument();
+    expect(screen.getByText(/There are no questions in this survey!/i)).toBeInTheDocument();
+  });
 
 //   test('成功获取问卷详情时，正确渲染各类型题目并处理返回按钮', async () => {
 //     const questionsData = {
@@ -120,4 +120,4 @@
 
 //     consoleErrorSpy.mockRestore();
 //   });
-// });
+});
