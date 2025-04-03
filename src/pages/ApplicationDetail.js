@@ -10,6 +10,10 @@ const ApplicationDetail = () => {
 
     const sessionToken = localStorage.getItem("sessionToken") || "";
 
+    const handleStatisticClick = () => {
+        navigate(`/Statistic/${surveyId}`); 
+    };
+
     useEffect(() => {
         if (!sessionToken.trim()) return;
 
@@ -70,6 +74,10 @@ const ApplicationDetail = () => {
             {/* 返回按钮 */}
             <button className="back-button" onClick={() => navigate("/")}>
                 Return to Home
+            </button>
+
+            <button className="back-button" onClick={handleStatisticClick}>
+                Statistic
             </button>
         </div>
     );

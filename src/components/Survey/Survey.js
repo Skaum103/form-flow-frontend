@@ -9,20 +9,20 @@ const Survey = ({ survey }) => {
         navigate(`/survey/${survey.surveyId}`); // 跳转到问卷详情页面
     };
 
-    const handleStatisticClick = () => {
-        navigate(`/Statistic/${survey.surveyId}`); 
-    };
+    // const handleStatisticClick = () => {
+    //     navigate(`/Statistic/${survey.surveyId}`); 
+    // };
 
     return (
-        <div className="survey-card">
+        <div className="survey-card" onClick={handleDetailsClick} style={{ cursor: 'pointer' }}>
             <h3>{survey.surveyName}</h3>
             <p>{survey.description}</p>
-            <button onClick={handleDetailsClick}>
+            {/* <button onClick={handleDetailsClick}>
                 Details
             </button>
             <button onClick={handleStatisticClick}>
                 Statistic
-            </button>
+            </button> */}
         </div>
     );
 };
