@@ -63,4 +63,6 @@ describe("Survey Component", () => {
 //     // 验证 useNavigate 被调用，并传入正确的 URL 参数
 //     expect(mockedNavigate).toHaveBeenCalledWith("/survey/1");
 //   });
+
 });
+
