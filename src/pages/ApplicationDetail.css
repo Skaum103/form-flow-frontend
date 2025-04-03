@@ -63,11 +63,26 @@
   border: 1px solid #ccc;
 }
 
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 0px; /* 两个按钮之间的间距 */
+}
+
 /* 返回按钮 */
 .back-button {
-  display: block;
+  /* display: block;
   width: 200px;
   margin: 20px auto;
+  padding: 10px;
+  font-size: 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center; */
+  width: 150px;
   padding: 10px;
   font-size: 16px;
   background: #007bff;

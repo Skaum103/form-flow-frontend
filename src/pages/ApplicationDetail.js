@@ -72,13 +72,15 @@ const ApplicationDetail = () => {
             )}
 
             {/* 返回按钮 */}
-            <button className="back-button" onClick={() => navigate("/")}>
-                Return to Home
-            </button>
+            <div className="button-row">
+                <button className="back-button" onClick={() => navigate("/")}>
+                    Return to Home
+                </button>
 
-            <button className="back-button" onClick={handleStatisticClick}>
-                Statistic
-            </button>
+                <button className="back-button" onClick={handleStatisticClick}>
+                    Statistic
+                </button>
+            </div>
         </div>
     );
 };
