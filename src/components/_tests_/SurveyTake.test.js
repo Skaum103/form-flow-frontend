@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import SurveyTake from "../Survey/SurveyTake";
 import { MemoryRouter } from "react-router-dom";
 
-// 模拟 useNavigate
+// 模拟useNavigate
 const mockedUsedNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
